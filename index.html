@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Home - RoktoSeva | Blood Donation Platform Bangladesh</title>
+  <meta name="description" content="Find blood donors near you across Bangladesh. Browse emergency blood requests, register as a donor, and help save lives with RoktoSeva." />
+  <link rel="icon" href="assets/favicon.ico" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            dark: '#070a13',
+            darker: '#050505',
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="min-h-screen flex flex-col bg-[#070a13] text-white">
+
+  <div id="navbar"></div>
+
+  <main class="flex-1">
+    <!-- HERO -->
+    <section class="relative min-h-[90vh] flex items-center justify-center bg-[#050505] overflow-hidden">
+      <div class="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-40"
+           style="background-image: url('https://images.unsplash.com/photo-1615461066841-6116e61058f4?q=80&w=2000&auto=format&fit=crop')"></div>
+      <div class="absolute inset-0 z-0 bg-[radial-gradient(circle_at_center,transparent_0%,#050505_100%)]"></div>
+      <div class="absolute inset-0 z-0 bg-gradient-to-t from-[#050505] via-transparent to-transparent"></div>
+
+      <div class="max-w-6xl mx-auto px-6 relative z-10 text-center">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 mb-6 mt-10 animate-fade-in">
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+          </span>
+          <span class="text-xs font-semibold text-red-400 uppercase tracking-widest">Live Blood Network</span>
+        </div>
+
+        <h1 class="text-5xl md:text-8xl font-extrabold text-white tracking-tighter mb-8 leading-[0.9] animate-fade-in animate-fade-in-delay-1">
+          রক্তদান করুন<br />
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-rose-600">
+            জীবনকে অনুপ্রাণিত করুন !
+          </span>
+        </h1>
+
+        <p class="max-w-xl mx-auto text-lg md:text-xl text-slate-400 font-light mb-10 leading-relaxed animate-fade-in animate-fade-in-delay-2">
+          'রক্তসেবা' সহানুভূতিশীল রক্তদাতাদের জরুরি প্রয়োজনে থাকা রোগীদের সাথে সংযুক্ত করে। নিরবচ্ছিন্ন ও তাৎক্ষণিক চিকিৎসা সহায়তা প্রদানে নিবেদিত এমন একটি কমিউনিটিতে আপনিও যোগ দিন।
+        </p>
+
+        <div class="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in animate-fade-in-delay-3">
+          <a href="register.html" class="px-8 py-4 bg-white text-black font-bold rounded-lg hover:bg-slate-200 transition-all active:scale-95">
+            Become a Donor
+          </a>
+          <a href="search.html" class="px-8 py-4 bg-white/5 text-white border border-white/10 font-medium rounded-lg hover:bg-white/10 transition-all backdrop-blur-sm">
+            Find Donors
+          </a>
+          <a href="dashboard/create-request.html" class="px-8 py-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition-all active:scale-95">
+            Request Blood
+          </a>
+        </div>
+
+        <div class="mt-20 pt-10 border-t border-white/10 grid grid-cols-3 gap-8 max-w-2xl mx-auto animate-fade-in animate-fade-in-delay-4">
+          <div>
+            <div class="text-3xl md:text-4xl font-bold text-white" id="statDonors">—</div>
+            <div class="text-[10px] uppercase tracking-widest text-slate-500 mt-1">Active Donors</div>
+          </div>
+          <div>
+            <div class="text-3xl md:text-4xl font-bold text-white" id="statRequests">—</div>
+            <div class="text-[10px] uppercase tracking-widest text-slate-500 mt-1">Pending Requests</div>
+          </div>
+          <div>
+            <div class="text-3xl md:text-4xl font-bold text-white" id="statDistricts">64</div>
+            <div class="text-[10px] uppercase tracking-widest text-slate-500 mt-1">Districts Covered</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PENDING REQUESTS -->
+    <section class="relative bg-[#070a13] text-white py-20 px-4 sm:px-8 overflow-hidden">
+      <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[1px] bg-gradient-to-r from-transparent via-red-500/20 to-transparent"></div>
+      <div class="absolute top-1/2 right-0 w-[400px] h-[400px] bg-red-600/5 rounded-full blur-[100px] pointer-events-none"></div>
+
+      <div class="max-w-7xl mx-auto relative z-10">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl md:text-4xl font-black uppercase tracking-tight mb-3">
+            Emergency <span class="text-red-500">Blood Requests</span>
+          </h2>
+          <p class="text-slate-400 text-sm max-w-md mx-auto">Live pending requests from patients across Bangladesh. Filter by blood group or district.</p>
+        </div>
+
+        <div class="flex flex-wrap gap-3 justify-center mb-10">
+          <select id="filterBlood" class="form-input w-auto min-w-[140px] text-sm py-2">
+            <option value="All">All Blood Groups</option>
+            <option value="A+">A+</option>
+            <option value="A-">A-</option>
+            <option value="B+">B+</option>
+            <option value="B-">B-</option>
+            <option value="AB+">AB+</option>
+            <option value="AB-">AB-</option>
+            <option value="O+">O+</option>
+            <option value="O-">O-</option>
+          </select>
+          <select id="filterDistrict" class="form-input w-auto min-w-[160px] text-sm py-2">
+            <option value="All">All Districts</option>
+          </select>
+        </div>
+
+        <div id="requestsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- loaded by JS -->
+        </div>
+
+        <div class="text-center mt-12">
+          <a href="search.html" class="inline-block px-8 py-3 bg-white/5 border border-white/10 text-white rounded-xl hover:bg-red-600 hover:border-red-500 transition-all font-bold uppercase text-xs tracking-wider">
+            Search Donors
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- GUIDELINES PREVIEW -->
+    <section class="relative bg-[#070a13] py-16 px-4 sm:px-8 border-t border-white/5">
+      <div class="max-w-7xl mx-auto text-center">
+        <h2 class="text-2xl md:text-3xl font-black uppercase tracking-tight mb-4">
+          Donation <span class="text-red-500">Guidelines</span>
+        </h2>
+        <p class="text-slate-400 text-sm max-w-lg mx-auto mb-8">Know the eligibility criteria before you donate blood. Stay safe, save lives.</p>
+        <a href="guidelines.html" class="inline-block px-6 py-3 bg-red-600/10 border border-red-500/30 text-red-400 rounded-xl hover:bg-red-600 hover:text-white transition-all font-bold text-sm uppercase tracking-wider">
+          Read Full Guidelines
+        </a>
+      </div>
+    </section>
+
+    <!-- FAQ PREVIEW -->
+    <section class="relative bg-[#070a13] py-16 px-4 sm:px-8 border-t border-white/5">
+      <div class="max-w-7xl mx-auto text-center">
+        <h2 class="text-2xl md:text-3xl font-black uppercase tracking-tight mb-4">
+          Frequently Asked <span class="text-red-500">Questions</span>
+        </h2>
+        <p class="text-slate-400 text-sm max-w-lg mx-auto mb-8">Have questions about blood donation? Find answers here.</p>
+        <a href="faq.html" class="inline-block px-6 py-3 bg-red-600/10 border border-red-500/30 text-red-400 rounded-xl hover:bg-red-600 hover:text-white transition-all font-bold text-sm uppercase tracking-wider">
+          View All FAQs
+        </a>
+      </div>
+    </section>
+
+    <!-- CONTACT PREVIEW -->
+    <section class="relative bg-[#070a13] py-16 px-4 sm:px-8 border-t border-white/5">
+      <div class="max-w-7xl mx-auto text-center">
+        <h2 class="text-2xl md:text-3xl font-black uppercase tracking-tight mb-4">
+          Get In <span class="text-red-500">Touch</span>
+        </h2>
+        <p class="text-slate-400 text-sm max-w-lg mx-auto mb-8">Need help or have a suggestion? We are here 24/7.</p>
+        <a href="contact.html" class="inline-block px-6 py-3 bg-red-600/10 border border-red-500/30 text-red-400 rounded-xl hover:bg-red-600 hover:text-white transition-all font-bold text-sm uppercase tracking-wider">
+          Contact Us
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <div id="footer"></div>
+
+  <script src="js/locationData.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/common.js"></script>
+  <script>
+    // Populate all districts in filter
+    const filterDistrict = document.getElementById("filterDistrict");
+    if (typeof districts !== "undefined") {
+      districts.sort((a, b) => a.name.localeCompare(b.name)).forEach((d) => {
+        const o = document.createElement("option");
+        o.value = d.name;
+        o.textContent = d.name;
+        filterDistrict.appendChild(o);
+      });
+    }
+
+    let allRequests = [];
+
+    function renderRequests(list) {
+      const grid = document.getElementById("requestsGrid");
+      if (!list.length) {
+        grid.innerHTML = emptyStateHTML(
+          "No pending blood requests right now.",
+          "dashboard/create-request.html",
+          "Post a request →"
+        );
+        return;
+      }
+      grid.innerHTML = list.map((req) => `
+        <div class="request-card group relative bg-[#0c101f]/70 border border-white/5 p-6 rounded-3xl transition-all duration-300 shadow-xl overflow-hidden">
+          <div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-red-500/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <div class="flex justify-between items-start mb-4">
+            <div class="w-12 h-12 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500 font-black text-xl">
+              ${req.bloodGroup || "—"}
+            </div>
+            <span class="text-[10px] uppercase font-bold ${(req.status || "").toLowerCase() === "urgent" ? "text-red-400 bg-red-500/10 border-red-500/20" : "text-yellow-500 bg-yellow-500/10 border-yellow-500/20"} px-2.5 py-1 rounded-lg border">
+              ${req.status || "Pending"}
+            </span>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-3 group-hover:text-red-400 transition-colors">${req.patientName || "Patient"}</h3>
+          <div class="space-y-1.5 text-sm text-slate-400">
+            <p class="text-xs">🏥 Hospital: <span class="text-slate-300 font-medium">${req.hospital || "—"}</span></p>
+            <p class="text-xs">📍 Location: <span class="text-slate-300 font-medium">${req.upazila || ""}${req.upazila && req.district ? ", " : ""}${req.district || "—"}</span></p>
+            <p class="text-xs">📅 Date Needed: <span class="text-slate-300 font-medium">${req.dateNeeded || "—"}</span></p>
+          </div>
+          <div class="mt-6">
+            <a href="search.html" class="block text-center w-full py-2.5 bg-white/5 border border-white/10 text-white rounded-xl hover:bg-red-600 hover:border-red-500 transition-all font-bold uppercase text-xs tracking-wider">
+              Find Matching Donors
+            </a>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function filterRequests() {
+      const blood = document.getElementById("filterBlood").value;
+      const district = document.getElementById("filterDistrict").value;
+      const filtered = allRequests.filter((r) => {
+        const matchBlood = blood === "All" || r.bloodGroup === blood;
+        const matchDistrict = district === "All" || r.district === district;
+        return matchBlood && matchDistrict;
+      });
+      renderRequests(filtered);
+    }
+
+    document.getElementById("filterBlood").addEventListener("change", filterRequests);
+    document.getElementById("filterDistrict").addEventListener("change", filterRequests);
+
+    // Load from Firebase
+    async function loadHomeData() {
+      const grid = document.getElementById("requestsGrid");
+      grid.innerHTML = loadingHTML();
+
+      const fb = await initFirebase();
+      if (!fb) {
+        document.getElementById("statDonors").textContent = "0";
+        document.getElementById("statRequests").textContent = "0";
+        grid.innerHTML = emptyStateHTML(
+          "Connect Firebase to see live requests. No demo data is shown.",
+          "register.html",
+          "Become a donor →"
+        );
+        return;
+      }
+
+      try {
+        const { collection, getDocs, query, where, orderBy, limit } = await getFirestoreFns();
+
+        // Pending requests
+        let reqSnap;
+        try {
+          reqSnap = await getDocs(
+            query(collection(fb.db, "requests"), where("status", "in", ["Pending", "Urgent"]), orderBy("createdAt", "desc"), limit(12))
+          );
+        } catch {
+          // Fallback if composite index missing
+          reqSnap = await getDocs(collection(fb.db, "requests"));
+        }
+
+        allRequests = [];
+        reqSnap.forEach((docSnap) => {
+          const d = docSnap.data();
+          if (d.status === "Pending" || d.status === "Urgent" || !d.status) {
+            allRequests.push({ id: docSnap.id, ...d });
+          }
+        });
+        // Sort client-side if needed
+        allRequests.sort((a, b) => {
+          const da = a.createdAt?.seconds || 0;
+          const db = b.createdAt?.seconds || 0;
+          return db - da;
+        });
+        allRequests = allRequests.slice(0, 12);
+
+        document.getElementById("statRequests").textContent = String(allRequests.length);
+        renderRequests(allRequests);
+
+        // Donor count
+        try {
+          const usersSnap = await getDocs(collection(fb.db, "users"));
+          document.getElementById("statDonors").textContent = String(usersSnap.size);
+        } catch {
+          document.getElementById("statDonors").textContent = "0";
+        }
+      } catch (err) {
+        console.error(err);
+        document.getElementById("statDonors").textContent = "0";
+        document.getElementById("statRequests").textContent = "0";
+        grid.innerHTML = emptyStateHTML(
+          "Could not load requests. Check Firebase connection.",
+          "dashboard/create-request.html",
+          "Create a request →"
+        );
+      }
+    }
+
+    loadHomeData();
+  </script>
+</body>
+</html>

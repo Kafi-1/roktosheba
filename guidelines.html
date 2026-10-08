@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guidelines - RoktoSeva</title>
+  <link rel="icon" href="assets/favicon.ico" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="min-h-screen flex flex-col bg-[#070a13] text-white">
+  <div id="navbar"></div>
+
+  <main class="flex-1 relative py-20 px-4 sm:px-8 overflow-hidden">
+    <div class="absolute top-1/4 right-0 w-[400px] h-[400px] bg-red-600/5 rounded-full blur-[120px] -z-10 pointer-events-none"></div>
+
+    <div class="max-w-6xl mx-auto">
+      <div class="mb-16">
+        <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight mb-3 leading-tight">
+          Blood Donation
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-rose-600">Guidelines</span>
+        </h1>
+        <p class="text-slate-400 text-sm sm:text-base max-w-xl font-light leading-relaxed">
+          Everything you need to know to donate safely, recover quickly, and make the biggest impact.
+        </p>
+      </div>
+
+      <!-- Eligibility -->
+      <div class="mb-16">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 mb-4">
+          <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-red-400">Eligibility</span>
+        </div>
+        <h2 class="text-2xl font-extrabold mb-6">Who Can <span class="text-red-500">Donate?</span></h2>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div class="bg-[#0c101f]/70 border border-white/5 rounded-2xl p-5 text-center">
+            <div class="text-2xl font-black text-red-500 mb-1">18–60</div>
+            <div class="text-xs text-slate-400 uppercase tracking-wider">Age (Years)</div>
+          </div>
+          <div class="bg-[#0c101f]/70 border border-white/5 rounded-2xl p-5 text-center">
+            <div class="text-2xl font-black text-red-500 mb-1">≥ 50 kg</div>
+            <div class="text-xs text-slate-400 uppercase tracking-wider">Weight</div>
+          </div>
+          <div class="bg-[#0c101f]/70 border border-white/5 rounded-2xl p-5 text-center">
+            <div class="text-2xl font-black text-red-500 mb-1">≥ 12.5</div>
+            <div class="text-xs text-slate-400 uppercase tracking-wider">Hemoglobin (g/dL)</div>
+          </div>
+          <div class="bg-[#0c101f]/70 border border-white/5 rounded-2xl p-5 text-center">
+            <div class="text-2xl font-black text-red-500 mb-1">90 Days</div>
+            <div class="text-xs text-slate-400 uppercase tracking-wider">Between Donations</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Before -->
+      <div class="mb-16">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 mb-4">
+          <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-red-400">Step 01</span>
+        </div>
+        <h2 class="text-2xl font-extrabold mb-6">Before <span class="text-red-500">Donating</span></h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="beforeTips"></div>
+      </div>
+
+      <!-- During -->
+      <div class="mb-16">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 mb-4">
+          <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-red-400">Step 02</span>
+        </div>
+        <h2 class="text-2xl font-extrabold mb-6">During <span class="text-red-500">Donation</span></h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" id="duringTips"></div>
+      </div>
+
+      <!-- After -->
+      <div class="mb-16">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 mb-4">
+          <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-red-400">Step 03</span>
+        </div>
+        <h2 class="text-2xl font-extrabold mb-6">After <span class="text-red-500">Donating</span></h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="afterTips"></div>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer"></div>
+  <script src="js/common.js"></script>
+  <script>
+    const beforeTips = [
+      { title: "Eat a healthy meal", desc: "Have a nutritious meal 2–3 hours before donating. Avoid fatty foods as they can affect blood tests." },
+      { title: "Stay well hydrated", desc: "Drink an extra 500 ml of water before your appointment. Good hydration makes the process easier and safer." },
+      { title: "Sleep well", desc: "Get at least 7–8 hours of sleep the night before. Fatigue can cause dizziness during or after donation." },
+      { title: "Avoid alcohol", desc: "Abstain from alcohol for at least 24 hours before donating. Alcohol dehydrates you and affects blood quality." },
+      { title: "Wear comfortable clothing", desc: "Wear a short-sleeve shirt or clothing with sleeves that roll up easily for quick access to your arm." },
+      { title: "Bring valid ID", desc: "Carry a valid national ID card or donor registration card if you have one." },
+    ];
+    const duringTips = [
+      { title: "Stay calm and relaxed", desc: "Anxiety can raise blood pressure. Take slow, deep breaths and focus on something positive." },
+      { title: "Inform staff of concerns", desc: "Tell the medical staff if you feel dizzy, nauseous, or unwell at any point during the process." },
+      { title: "Keep your arm still", desc: "Avoid moving or tensing your arm during donation. Staying still ensures a smooth and faster process." },
+      { title: "Squeeze the stress ball", desc: "Gently squeezing a stress ball during donation helps maintain blood flow and speeds up the process." },
+    ];
+    const afterTips = [
+      { title: "Rest for 10–15 minutes", desc: "Sit or lie down at the donation site for at least 10 minutes before leaving to avoid dizziness." },
+      { title: "Drink fluids", desc: "Drink extra water, juice, or electrolyte drinks for the next 24 hours to replace lost fluids." },
+      { title: "Eat a snack", desc: "Have a small snack like biscuits or fruit juice immediately after donation to restore blood sugar." },
+      { title: "Avoid heavy lifting", desc: "Do not lift heavy objects with the donation arm for 5 hours after giving blood." },
+      { title: "Skip intense exercise", desc: "Avoid vigorous exercise or strenuous physical activity for the rest of the day." },
+      { title: "Keep the bandage on", desc: "Leave the bandage on for at least 4 hours. If the site bleeds, apply firm pressure and raise your arm." },
+    ];
+
+    function renderTips(containerId, tips) {
+      document.getElementById(containerId).innerHTML = tips.map((t, i) => `
+        <div class="bg-[#0c101f]/70 border border-white/5 rounded-2xl p-5 hover:border-red-500/20 transition-all">
+          <div class="flex items-start gap-3">
+            <span class="flex-shrink-0 w-8 h-8 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-400 text-xs font-bold">${i + 1}</span>
+            <div>
+              <p class="text-sm font-bold text-white mb-1">${t.title}</p>
+              <p class="text-xs text-slate-400 leading-relaxed">${t.desc}</p>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+    renderTips('beforeTips', beforeTips);
+    renderTips('duringTips', duringTips);
+    renderTips('afterTips', afterTips);
+  </script>
+</body>
+</html>

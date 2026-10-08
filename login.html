@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - RoktoSeva</title>
+  <link rel="icon" href="assets/favicon.ico" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="min-h-screen flex flex-col bg-[#070a13] text-white">
+
+  <div id="navbar"></div>
+
+  <main class="flex-1 relative min-h-screen flex items-center justify-center px-4 py-12 overflow-hidden">
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-red-600/5 rounded-full blur-[140px] -z-10"></div>
+
+    <div class="w-full max-w-md backdrop-blur-xl bg-[#0c101f]/80 border border-white/5 rounded-3xl p-8 shadow-[0_20px_50px_rgba(0,0,0,0.6)] relative z-10">
+      <div class="flex justify-center mb-6">
+        <div class="p-3 rounded-2xl bg-white/[0.03] border border-white/5 shadow-inner">
+          <div class="flex items-center gap-2.5">
+            <img src="assets/roktoseba.jpg" alt="Logo" class="object-cover shrink-0 rounded-full border-2 border-red-500/50" style="width:50px;height:50px" onerror="this.src='https://placehold.co/100x100/ef4444/ffffff?text=RS'">
+            <div class="flex flex-col">
+              <span class="font-black uppercase tracking-wider leading-none text-lg">
+                <span class="text-red-500">রক্ত</span><span class="text-red-500">সেবা</span>
+              </span>
+              <span class="text-[10px] font-semibold uppercase tracking-widest text-slate-400 mt-1">Blood Donation</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h2 class="text-3xl font-black text-center text-white uppercase tracking-wider mb-2">
+        Welcome <span class="text-red-500 drop-shadow-[0_0_15px_rgba(239,68,68,0.4)]">Back</span>
+      </h2>
+      <p class="text-center text-slate-400 text-sm mb-8 font-medium uppercase tracking-widest">
+        Access the blood network
+      </p>
+
+      <form id="loginForm" class="space-y-5" novalidate>
+        <div>
+          <label class="form-label" for="email">Email Address</label>
+          <input type="email" id="email" name="email" required placeholder="name@example.com" class="form-input" autocomplete="email" />
+        </div>
+        <div>
+          <label class="form-label" for="password">Password</label>
+          <input type="password" id="password" name="password" required minlength="6" placeholder="••••••••" class="form-input" autocomplete="current-password" />
+        </div>
+        <div class="pt-4">
+          <button type="submit" id="loginBtn" class="w-full py-3.5 bg-gradient-to-r from-red-600 to-rose-600 border-0 rounded-xl text-white font-bold uppercase tracking-widest shadow-[0_4px_25px_rgba(220,38,38,0.25)] hover:shadow-[0_4px_35px_rgba(220,38,38,0.45)] transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2">
+            <span id="loginBtnText">Login</span>
+            <span id="loginSpinner" class="spinner hidden"></span>
+          </button>
+        </div>
+      </form>
+
+      <div class="text-center text-sm text-slate-400 mt-6 font-medium">
+        Don't have an account?
+        <a href="register.html" class="text-red-500 hover:text-red-400 transition-colors duration-200 font-bold underline">Register Here</a>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer"></div>
+
+  <script src="js/firebase-config.js"></script>
+  <script src="js/common.js"></script>
+  <script>
+    // Redirect if already logged in
+    if (getCurrentUser()) {
+      window.location.href = "dashboard/index.html";
+    }
+
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById("loginBtn");
+      const btnText = document.getElementById("loginBtnText");
+      const spinner = document.getElementById("loginSpinner");
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+
+      if (!isValidEmail(email)) {
+        showToast("Please enter a valid email address.", "error");
+        return;
+      }
+      if (password.length < 6) {
+        showToast("Password must be at least 6 characters.", "error");
+        return;
+      }
+
+      btn.disabled = true;
+      btnText.textContent = "Signing in...";
+      spinner.classList.remove("hidden");
+
+      try {
+        const fb = await initFirebase();
+        if (!fb) {
+          showToast("Firebase is not configured yet. Add your keys in js/firebase-config.js", "error");
+          btn.disabled = false;
+          btnText.textContent = "Login";
+          spinner.classList.add("hidden");
+          return;
+        }
+
+        const { signInWithEmailAndPassword } = await getAuthFns();
+        const { doc, getDoc } = await getFirestoreFns();
+
+        const cred = await signInWithEmailAndPassword(fb.auth, email, password);
+        const uid = cred.user.uid;
+
+        // Load profile from Firestore
+        const profileSnap = await getDoc(doc(fb.db, "users", uid));
+        let profile = {
+          uid,
+          name: email.split("@")[0],
+          email,
+          bloodGroup: "",
+          district: "",
+          upazila: "",
+          phone: "",
+          image: "",
+          role: "donor"
+        };
+        if (profileSnap.exists()) {
+          profile = { uid, ...profileSnap.data(), email: cred.user.email };
+        }
+
+        setCurrentUser(profile);
+        showToast("Login successful! Redirecting...", "success");
+        setTimeout(() => {
+          window.location.href = "dashboard/index.html";
+        }, 800);
+      } catch (err) {
+        console.error(err);
+        let msg = "Login failed. Please try again.";
+        if (err.code === "auth/user-not-found" || err.code === "auth/wrong-password" || err.code === "auth/invalid-credential") {
+          msg = "Invalid email or password.";
+        } else if (err.code === "auth/too-many-requests") {
+          msg = "Too many attempts. Try again later.";
+        } else if (err.message) {
+          msg = err.message;
+        }
+        showToast(msg, "error");
+        btn.disabled = false;
+        btnText.textContent = "Login";
+        spinner.classList.add("hidden");
+      }
+    });
+  </script>
+</body>
+</html>

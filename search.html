@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Search Donors - RoktoSeva</title>
+  <link rel="icon" href="assets/favicon.ico" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="min-h-screen flex flex-col bg-[#070a13] text-white">
+  <div id="navbar"></div>
+
+  <main class="flex-1 relative py-16 px-4 sm:px-8">
+    <div class="max-w-7xl mx-auto">
+      <div class="text-center mb-10">
+        <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight mb-3">
+          Search <span class="text-red-500">Blood Donors</span>
+        </h1>
+        <p class="text-slate-400 text-sm max-w-md mx-auto">Find donors by blood group and location across Bangladesh.</p>
+      </div>
+
+      <div class="bg-[#0c101f]/70 border border-white/5 rounded-2xl p-5 sm:p-6 mb-10 flex flex-wrap gap-4 justify-center items-end">
+        <div>
+          <label class="form-label" for="searchBlood">Blood Group</label>
+          <select id="searchBlood" class="form-input min-w-[140px]">
+            <option value="All">All Groups</option>
+            <option value="A+">A+</option><option value="A-">A-</option>
+            <option value="B+">B+</option><option value="B-">B-</option>
+            <option value="AB+">AB+</option><option value="AB-">AB-</option>
+            <option value="O+">O+</option><option value="O-">O-</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label" for="searchDistrict">District</label>
+          <select id="searchDistrict" class="form-input min-w-[160px]">
+            <option value="All">All Districts</option>
+          </select>
+        </div>
+        <button type="button" id="searchBtn" class="px-6 py-3 bg-gradient-to-r from-red-600 to-rose-600 rounded-xl text-white font-bold text-sm uppercase tracking-wider hover:shadow-[0_0_20px_rgba(239,68,68,0.4)] transition-all disabled:opacity-50 flex items-center gap-2">
+          <span id="searchBtnText">Search</span>
+          <span id="searchSpinner" class="spinner hidden"></span>
+        </button>
+      </div>
+
+      <div id="searchResults" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <p class="col-span-full text-center text-slate-500 py-16">Select filters and click Search to find donors.</p>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer"></div>
+  <script src="js/locationData.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/common.js"></script>
+  <script>
+    const distSelect = document.getElementById("searchDistrict");
+    districts.sort((a, b) => a.name.localeCompare(b.name)).forEach((d) => {
+      const o = document.createElement("option");
+      o.value = d.name;
+      o.textContent = d.name;
+      distSelect.appendChild(o);
+    });
+
+    function renderDonors(list) {
+      const grid = document.getElementById("searchResults");
+      if (!list.length) {
+        grid.innerHTML = emptyStateHTML("No donors found matching your criteria.", null, null);
+        return;
+      }
+      grid.innerHTML = list.map((d) => {
+        const initial = (d.name || "D").charAt(0).toUpperCase();
+        const phoneDisplay = d.phone
+          ? d.phone.replace(/(\d{5})\d{4}(\d{2})/, "$1****$2")
+          : "Hidden";
+        return `
+        <div class="bg-[#0c101f]/70 border border-white/5 rounded-2xl p-6 hover:border-red-500/30 transition-all">
+          <div class="flex items-center gap-4 mb-4">
+            <div class="w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500 font-black text-xl">${d.bloodGroup || "—"}</div>
+            <div>
+              <h3 class="font-bold text-white">${d.name || "Donor"}</h3>
+              <p class="text-xs text-slate-400">${d.upazila || ""}${d.upazila && d.district ? ", " : ""}${d.district || ""}</p>
+            </div>
+          </div>
+          <div class="space-y-1.5 text-sm text-slate-400">
+            <p class="text-xs">📞 Phone: <span class="text-slate-300 font-medium">${phoneDisplay}</span></p>
+            <p class="text-xs">🩸 Group: <span class="text-red-400 font-bold">${d.bloodGroup || "—"}</span></p>
+            ${d.available === false ? '<p class="text-xs text-yellow-500">Currently unavailable</p>' : '<p class="text-xs text-green-500">Available</p>'}
+          </div>
+          ${d.phone ? `<a href="tel:${d.phone}" class="mt-5 block text-center w-full py-2.5 bg-white/5 border border-white/10 text-white rounded-xl hover:bg-red-600 hover:border-red-500 transition-all font-bold uppercase text-xs tracking-wider">Call Donor</a>` : ""}
+        </div>
+      `;
+      }).join("");
+    }
+
+    document.getElementById("searchBtn").addEventListener("click", async () => {
+      const blood = document.getElementById("searchBlood").value;
+      const district = document.getElementById("searchDistrict").value;
+      const btn = document.getElementById("searchBtn");
+      const btnText = document.getElementById("searchBtnText");
+      const spinner = document.getElementById("searchSpinner");
+      const grid = document.getElementById("searchResults");
+
+      btn.disabled = true;
+      btnText.textContent = "Searching...";
+      spinner.classList.remove("hidden");
+      grid.innerHTML = loadingHTML();
+
+      try {
+        const fb = await initFirebase();
+        if (!fb) {
+          grid.innerHTML = emptyStateHTML(
+            "Firebase is not configured. Add your keys in js/firebase-config.js to search real donors.",
+            "register.html",
+            "Register as donor →"
+          );
+          return;
+        }
+
+        const { collection, getDocs, query, where } = await getFirestoreFns();
+        let snap;
+
+        // Build query based on filters (client-side filter for flexibility)
+        snap = await getDocs(collection(fb.db, "users"));
+        let results = [];
+        snap.forEach((docSnap) => {
+          const d = docSnap.data();
+          if (d.role && d.role !== "donor" && d.role !== "user") return;
+          const matchBlood = blood === "All" || d.bloodGroup === blood;
+          const matchDist = district === "All" || d.district === district;
+          if (matchBlood && matchDist) {
+            results.push({ id: docSnap.id, ...d });
+          }
+        });
+
+        renderDonors(results);
+      } catch (err) {
+        console.error(err);
+        grid.innerHTML = emptyStateHTML("Search failed. Check Firebase connection.", null, null);
+        showToast("Search failed. Try again.", "error");
+      } finally {
+        btn.disabled = false;
+        btnText.textContent = "Search";
+        spinner.classList.add("hidden");
+      }
+    });
+  </script>
+</body>
+</html>

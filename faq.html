@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FAQ - RoktoSeva</title>
+  <link rel="icon" href="assets/favicon.ico" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="min-h-screen flex flex-col bg-[#070a13] text-white">
+  <div id="navbar"></div>
+
+  <main class="flex-1 relative py-20 px-4 sm:px-8">
+    <div class="max-w-3xl mx-auto">
+      <div class="text-center mb-12">
+        <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight mb-3">
+          Frequently Asked <span class="text-red-500">Questions</span>
+        </h1>
+        <p class="text-slate-400 text-sm max-w-md mx-auto">Everything you need to know about RoktoSeva and blood donation.</p>
+      </div>
+
+      <div id="faqList" class="space-y-3"></div>
+    </div>
+  </main>
+
+  <div id="footer"></div>
+  <script src="js/common.js"></script>
+  <script>
+    const faqs = [
+      { q: "What is RoktoSeva?", a: "RoktoSeva (রক্তসেবা — 'Blood Service') is a free blood donation platform built for Bangladesh. It connects blood donors with patients in urgent need through a real-time request system and smart donor search." },
+      { q: "Is RoktoSeva free to use?", a: "Yes, RoktoSeva is completely free for donors and patients. Creating an account, searching for donors, and making blood requests all cost nothing." },
+      { q: "Which areas does RoktoSeva cover?", a: "RoktoSeva covers all 64 districts of Bangladesh with upazila-level precision. You can search for donors or post requests from anywhere in the country." },
+      { q: "Who can donate blood?", a: "Generally, anyone aged 18–60 who weighs at least 50 kg and is in good health can donate blood. You should not donate if you have a fever, recent illness, pregnancy, or certain chronic conditions." },
+      { q: "How often can I donate blood?", a: "Whole blood can be donated once every 3 months (90 days). This gives your body enough time to replenish red blood cells." },
+      { q: "Does donating blood hurt?", a: "You may feel a small pinch when the needle is inserted, but the actual donation process (around 8–10 minutes) is generally painless." },
+      { q: "How do I register as a donor?", a: "Click 'Register' on the top navbar, fill in your details including blood group, district, and upazila, and submit. Your profile will be searchable by anyone looking for donors in your area." },
+      { q: "How do I request blood?", a: "Log in to your account and go to Dashboard → Create Donation Request. Fill in the required blood group, hospital location, and urgency level. Your request will go live immediately." },
+      { q: "Is my personal data safe?", a: "Yes. We use secure authentication. We never sell or share your personal information with third parties. Your contact details are only visible to verified users on the platform." },
+      { q: "What blood groups are supported?", a: "All 8 standard blood groups: A+, A−, B+, B−, AB+, AB−, O+, and O−. O− is the universal donor and is always in high demand." },
+    ];
+
+    document.getElementById('faqList').innerHTML = faqs.map((f, i) => `
+      <div class="bg-[#0c101f]/70 border border-white/5 rounded-2xl overflow-hidden">
+        <button onclick="toggleFaq(${i})" class="w-full flex items-center justify-between p-5 text-left hover:bg-white/[0.02] transition-colors">
+          <span class="font-semibold text-sm sm:text-base pr-4">${f.q}</span>
+          <svg id="icon-${i}" class="w-5 h-5 text-red-500 flex-shrink-0 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+        <div id="answer-${i}" class="hidden px-5 pb-5 text-sm text-slate-400 leading-relaxed border-t border-white/5 pt-4">
+          ${f.a}
+        </div>
+      </div>
+    `).join('');
+
+    function toggleFaq(i) {
+      const ans = document.getElementById('answer-' + i);
+      const icon = document.getElementById('icon-' + i);
+      const isOpen = !ans.classList.contains('hidden');
+      // Close all
+      document.querySelectorAll('[id^="answer-"]').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('[id^="icon-"]').forEach(el => el.style.transform = 'rotate(0deg)');
+      if (!isOpen) {
+        ans.classList.remove('hidden');
+        icon.style.transform = 'rotate(180deg)';
+      }
+    }
+  </script>
+</body>
+</html>

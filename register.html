@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register - RoktoSeva</title>
+  <link rel="icon" href="assets/favicon.ico" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="min-h-screen flex flex-col bg-[#070a13] text-white">
+
+  <div id="navbar"></div>
+
+  <main class="flex-1 relative min-h-screen flex items-center justify-center px-4 py-12 overflow-hidden">
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-red-600/5 rounded-full blur-[140px] -z-10"></div>
+
+    <div class="w-full max-w-2xl backdrop-blur-xl bg-[#0c101f]/80 border border-white/5 rounded-3xl p-8 shadow-[0_20px_50px_rgba(0,0,0,0.6)] relative z-10">
+      <div class="flex justify-center mb-6">
+        <div class="p-3 rounded-2xl bg-white/[0.03] border border-white/5 shadow-inner">
+          <div class="flex items-center gap-2.5">
+            <img src="assets/roktoseba.jpg" alt="Logo" class="object-cover shrink-0 rounded-full border-2 border-red-500/50" style="width:50px;height:50px" onerror="this.src='https://placehold.co/100x100/ef4444/ffffff?text=RS'">
+            <div class="flex flex-col">
+              <span class="font-black uppercase tracking-wider leading-none text-lg">
+                <span class="text-red-500">রক্ত</span><span class="text-red-500">সেবা</span>
+              </span>
+              <span class="text-[10px] font-semibold uppercase tracking-widest text-slate-400 mt-1">Blood Donation</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h2 class="text-3xl font-black text-center text-white uppercase tracking-wider mb-2">
+        Join the <span class="text-red-500">Network</span>
+      </h2>
+      <p class="text-center text-slate-400 text-sm mb-8 font-medium uppercase tracking-widest">
+        Register as a blood donor
+      </p>
+
+      <form id="registerForm" class="grid grid-cols-1 sm:grid-cols-2 gap-5" novalidate>
+        <div>
+          <label class="form-label" for="name">Full Name</label>
+          <input type="text" id="name" name="name" required minlength="2" placeholder="Your full name" class="form-input" />
+        </div>
+        <div>
+          <label class="form-label" for="email">Email Address</label>
+          <input type="email" id="email" name="email" required placeholder="name@example.com" class="form-input" autocomplete="email" />
+        </div>
+        <div>
+          <label class="form-label" for="phone">Phone (BD)</label>
+          <input type="tel" id="phone" name="phone" required placeholder="01XXXXXXXXX" class="form-input" pattern="01[3-9][0-9]{8}" />
+        </div>
+        <div>
+          <label class="form-label" for="blood_group">Blood Group</label>
+          <select id="blood_group" name="blood_group" required class="form-input">
+            <option value="">Select Blood Group</option>
+            <option value="A+">A+</option>
+            <option value="A-">A-</option>
+            <option value="B+">B+</option>
+            <option value="B-">B-</option>
+            <option value="AB+">AB+</option>
+            <option value="AB-">AB-</option>
+            <option value="O+">O+</option>
+            <option value="O-">O-</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label" for="districtSelect">District</label>
+          <select name="district" id="districtSelect" required class="form-input">
+            <option value="">Select District</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label" for="upazilaSelect">Upazila</label>
+          <select name="upazila" id="upazilaSelect" required disabled class="form-input">
+            <option value="">Select District First</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label" for="password">Password</label>
+          <input type="password" id="password" name="password" required minlength="6" placeholder="Min 6 characters" class="form-input" autocomplete="new-password" />
+        </div>
+        <div>
+          <label class="form-label" for="confirm_password">Confirm Password</label>
+          <input type="password" id="confirm_password" name="confirm_password" required minlength="6" placeholder="••••••••" class="form-input" autocomplete="new-password" />
+        </div>
+
+        <div class="sm:col-span-2 pt-4">
+          <button type="submit" id="regBtn" class="w-full py-3.5 bg-gradient-to-r from-red-600 to-rose-600 border-0 rounded-xl text-white font-bold uppercase tracking-widest shadow-[0_4px_25px_rgba(220,38,38,0.25)] hover:shadow-[0_4px_35px_rgba(220,38,38,0.45)] transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2">
+            <span id="regBtnText">Register</span>
+            <span id="regSpinner" class="spinner hidden"></span>
+          </button>
+        </div>
+      </form>
+
+      <div class="text-center text-sm text-slate-400 mt-6 font-medium">
+        Already have an account?
+        <a href="login.html" class="text-red-500 hover:text-red-400 transition-colors duration-200 font-bold underline">Login Here</a>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer"></div>
+
+  <script src="js/locationData.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/common.js"></script>
+  <script>
+    if (getCurrentUser()) {
+      window.location.href = "dashboard/index.html";
+    }
+
+    const districtSelect = document.getElementById("districtSelect");
+    const upazilaSelect = document.getElementById("upazilaSelect");
+
+    districts.sort((a, b) => a.name.localeCompare(b.name)).forEach((d) => {
+      const opt = document.createElement("option");
+      opt.value = d.id;
+      opt.textContent = d.name;
+      districtSelect.appendChild(opt);
+    });
+
+    districtSelect.addEventListener("change", () => {
+      const districtId = districtSelect.value;
+      upazilaSelect.innerHTML = "";
+      if (!districtId) {
+        upazilaSelect.disabled = true;
+        upazilaSelect.innerHTML = '<option value="">Select District First</option>';
+        return;
+      }
+      const filtered = upazilas
+        .filter((u) => u.district_id === districtId)
+        .sort((a, b) => a.name.localeCompare(b.name));
+      upazilaSelect.disabled = false;
+      upazilaSelect.innerHTML = '<option value="">Select Upazila</option>';
+      filtered.forEach((u) => {
+        const opt = document.createElement("option");
+        opt.value = u.name;
+        opt.textContent = u.name;
+        upazilaSelect.appendChild(opt);
+      });
+    });
+
+    document.getElementById("registerForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById("regBtn");
+      const btnText = document.getElementById("regBtnText");
+      const spinner = document.getElementById("regSpinner");
+
+      const name = document.getElementById("name").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const phone = document.getElementById("phone").value.trim().replace(/\s|-/g, "");
+      const bloodGroup = document.getElementById("blood_group").value;
+      const districtId = districtSelect.value;
+      const upazila = upazilaSelect.value;
+      const password = document.getElementById("password").value;
+      const confirm = document.getElementById("confirm_password").value;
+      const districtName = districts.find((d) => d.id === districtId)?.name || "";
+
+      if (name.length < 2) {
+        showToast("Please enter your full name.", "error");
+        return;
+      }
+      if (!isValidEmail(email)) {
+        showToast("Please enter a valid email.", "error");
+        return;
+      }
+      if (!isValidBDPhone(phone)) {
+        showToast("Enter a valid BD phone (01XXXXXXXXX).", "error");
+        return;
+      }
+      if (!bloodGroup) {
+        showToast("Select your blood group.", "error");
+        return;
+      }
+      if (!districtId || !upazila) {
+        showToast("Select district and upazila.", "error");
+        return;
+      }
+      if (password.length < 6) {
+        showToast("Password must be at least 6 characters.", "error");
+        return;
+      }
+      if (password !== confirm) {
+        showToast("Passwords do not match!", "error");
+        return;
+      }
+
+      btn.disabled = true;
+      btnText.textContent = "Creating Account...";
+      spinner.classList.remove("hidden");
+
+      try {
+        const fb = await initFirebase();
+        if (!fb) {
+          showToast("Firebase is not configured yet. Add your keys in js/firebase-config.js", "error");
+          btn.disabled = false;
+          btnText.textContent = "Register";
+          spinner.classList.add("hidden");
+          return;
+        }
+
+        const { createUserWithEmailAndPassword } = await getAuthFns();
+        const { doc, setDoc, serverTimestamp } = await getFirestoreFns();
+
+        const cred = await createUserWithEmailAndPassword(fb.auth, email, password);
+        const uid = cred.user.uid;
+
+        const profile = {
+          uid,
+          name,
+          email,
+          phone,
+          bloodGroup,
+          district: districtName,
+          upazila,
+          role: "donor",
+          image: "",
+          available: true,
+          createdAt: serverTimestamp()
+        };
+
+        await setDoc(doc(fb.db, "users", uid), profile);
+
+        setCurrentUser({
+          uid,
+          name,
+          email,
+          phone,
+          bloodGroup,
+          district: districtName,
+          upazila,
+          role: "donor",
+          image: ""
+        });
+
+        showToast("Account created successfully! Redirecting...", "success");
+        setTimeout(() => {
+          window.location.href = "dashboard/index.html";
+        }, 800);
+      } catch (err) {
+        console.error(err);
+        let msg = "Registration failed. Please try again.";
+        if (err.code === "auth/email-already-in-use") {
+          msg = "This email is already registered. Please login.";
+        } else if (err.code === "auth/weak-password") {
+          msg = "Password is too weak.";
+        } else if (err.message) {
+          msg = err.message;
+        }
+        showToast(msg, "error");
+        btn.disabled = false;
+        btnText.textContent = "Register";
+        spinner.classList.add("hidden");
+      }
+    });
+  </script>
+</body>
+</html>
