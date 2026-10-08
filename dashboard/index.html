@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard - RoktoSeva</title>
+  <link rel="icon" href="../assets/favicon.ico" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body class="min-h-screen flex flex-col bg-[#070a13] text-white">
+  <div id="navbar"></div>
+
+  <main class="flex-1 relative py-12 px-4 sm:px-8">
+    <div class="max-w-6xl mx-auto">
+      <div class="mb-10">
+        <h1 class="text-3xl font-extrabold tracking-tight mb-1">
+          Welcome back, <span class="text-red-500" id="userName">Donor</span>
+        </h1>
+        <p class="text-slate-400 text-sm">Manage your donations, requests, and profile from here.</p>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+        <div class="bg-[#0c101f]/70 border border-white/5 rounded-2xl p-5 text-center">
+          <div class="text-2xl font-black text-white mb-1" id="statMyRequests">—</div>
+          <div class="text-[10px] uppercase tracking-widest text-slate-500">My Requests</div>
+        </div>
+        <div class="bg-[#0c101f]/70 border border-white/5 rounded-2xl p-5 text-center">
+          <div class="text-2xl font-black text-white mb-1" id="statDonations">—</div>
+          <div class="text-[10px] uppercase tracking-widest text-slate-500">Donations Made</div>
+        </div>
+        <div class="bg-[#0c101f]/70 border border-white/5 rounded-2xl p-5 text-center">
+          <div class="text-2xl font-black text-red-500 mb-1" id="userBlood">—</div>
+          <div class="text-[10px] uppercase tracking-widest text-slate-500">Blood Group</div>
+        </div>
+        <div class="bg-[#0c101f]/70 border border-white/5 rounded-2xl p-5 text-center">
+          <div class="text-2xl font-black text-white mb-1" id="userStatus">Active</div>
+          <div class="text-[10px] uppercase tracking-widest text-slate-500">Status</div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <a href="create-request.html" class="group bg-[#0c101f]/70 border border-white/5 rounded-2xl p-6 hover:border-red-500/40 transition-all">
+          <div class="w-12 h-12 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500 text-xl mb-4 group-hover:bg-red-500/20 transition-colors">+</div>
+          <h3 class="font-bold text-white mb-1">Create Request</h3>
+          <p class="text-xs text-slate-400">Post a new blood donation request for a patient.</p>
+        </a>
+        <a href="my-requests.html" class="group bg-[#0c101f]/70 border border-white/5 rounded-2xl p-6 hover:border-red-500/40 transition-all">
+          <div class="w-12 h-12 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500 text-xl mb-4 group-hover:bg-red-500/20 transition-colors">📋</div>
+          <h3 class="font-bold text-white mb-1">My Requests</h3>
+          <p class="text-xs text-slate-400">View and manage your active donation requests.</p>
+        </a>
+        <a href="../search.html" class="group bg-[#0c101f]/70 border border-white/5 rounded-2xl p-6 hover:border-red-500/40 transition-all">
+          <div class="w-12 h-12 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500 text-xl mb-4 group-hover:bg-red-500/20 transition-colors">🔍</div>
+          <h3 class="font-bold text-white mb-1">Search Donors</h3>
+          <p class="text-xs text-slate-400">Find available donors by blood group and location.</p>
+        </a>
+        <a href="funding.html" class="group bg-[#0c101f]/70 border border-white/5 rounded-2xl p-6 hover:border-red-500/40 transition-all">
+          <div class="w-12 h-12 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500 text-xl mb-4 group-hover:bg-red-500/20 transition-colors">❤️</div>
+          <h3 class="font-bold text-white mb-1">Support Us</h3>
+          <p class="text-xs text-slate-400">Contribute to keep the platform running.</p>
+        </a>
+        <a href="profile.html" class="group bg-[#0c101f]/70 border border-white/5 rounded-2xl p-6 hover:border-red-500/40 transition-all">
+          <div class="w-12 h-12 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500 text-xl mb-4 group-hover:bg-red-500/20 transition-colors">👤</div>
+          <h3 class="font-bold text-white mb-1">My Profile</h3>
+          <p class="text-xs text-slate-400">Update your personal info and blood group.</p>
+        </a>
+        <a href="../guidelines.html" class="group bg-[#0c101f]/70 border border-white/5 rounded-2xl p-6 hover:border-red-500/40 transition-all">
+          <div class="w-12 h-12 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500 text-xl mb-4 group-hover:bg-red-500/20 transition-colors">📖</div>
+          <h3 class="font-bold text-white mb-1">Guidelines</h3>
+          <p class="text-xs text-slate-400">Read blood donation eligibility guidelines.</p>
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer"></div>
+  <script src="../js/firebase-config.js"></script>
+  <script src="../js/common.js"></script>
+  <script>
+    const user = requireAuth();
+    if (user) {
+      document.getElementById("userName").textContent = user.name || "Donor";
+      document.getElementById("userBlood").textContent = user.bloodGroup || "—";
+    }
+
+    async function loadDashboardStats() {
+      if (!user || !user.uid) {
+        document.getElementById("statMyRequests").textContent = "0";
+        document.getElementById("statDonations").textContent = "0";
+        return;
+      }
+      const fb = await initFirebase();
+      if (!fb) {
+        document.getElementById("statMyRequests").textContent = "0";
+        document.getElementById("statDonations").textContent = "0";
+        return;
+      }
+      try {
+        const { collection, getDocs, query, where } = await getFirestoreFns();
+        const snap = await getDocs(
+          query(collection(fb.db, "requests"), where("userId", "==", user.uid))
+        );
+        document.getElementById("statMyRequests").textContent = String(snap.size);
+        document.getElementById("statDonations").textContent = "0";
+      } catch (err) {
+        console.error(err);
+        document.getElementById("statMyRequests").textContent = "0";
+        document.getElementById("statDonations").textContent = "0";
+      }
+    }
+    loadDashboardStats();
+  </script>
+</body>
+    </html>
