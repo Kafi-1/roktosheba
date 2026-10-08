@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Support Us - RoktoSeva</title>
+  <link rel="icon" href="../assets/favicon.ico" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body class="min-h-screen flex flex-col bg-[#070a13] text-white">
+  <div id="navbar"></div>
+
+  <main class="flex-1 relative py-16 px-4 sm:px-8">
+    <div class="max-w-2xl mx-auto text-center">
+      <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight mb-3">
+        Support <span class="text-red-500">RoktoSeva</span>
+      </h1>
+      <p class="text-slate-400 text-sm max-w-md mx-auto mb-10">
+        Your contribution helps us keep the platform free and running 24/7 for patients and donors across Bangladesh.
+      </p>
+
+      <div class="bg-[#0c101f]/70 border border-white/5 rounded-3xl p-8 mb-8">
+        <div class="text-4xl font-black text-white mb-2" id="totalFunding">—</div>
+        <div class="text-xs uppercase tracking-widest text-slate-500 mb-6">Total Community Support</div>
+
+        <div class="grid grid-cols-3 gap-3 mb-8">
+          <button type="button" onclick="selectAmount(100)" class="amount-btn py-3 rounded-xl border border-white/10 hover:border-red-500/50 hover:bg-red-500/10 transition-all font-bold">৳100</button>
+          <button type="button" onclick="selectAmount(500)" class="amount-btn py-3 rounded-xl border border-white/10 hover:border-red-500/50 hover:bg-red-500/10 transition-all font-bold">৳500</button>
+          <button type="button" onclick="selectAmount(1000)" class="amount-btn py-3 rounded-xl border border-white/10 hover:border-red-500/50 hover:bg-red-500/10 transition-all font-bold">৳1000</button>
+        </div>
+
+        <div class="mb-6">
+          <label class="form-label text-center" for="customAmount">Custom Amount (BDT)</label>
+          <input type="number" id="customAmount" min="1" placeholder="Enter amount" class="form-input text-center text-lg" />
+        </div>
+
+        <button type="button" onclick="donate()" class="w-full py-4 bg-gradient-to-r from-red-600 to-rose-600 rounded-xl text-white font-bold uppercase tracking-widest shadow-[0_4px_25px_rgba(220,38,38,0.25)] hover:shadow-[0_4px_35px_rgba(220,38,38,0.45)] transition-all">
+          Donate Now
+        </button>
+        <p class="text-[10px] text-slate-500 mt-4">Payment gateway (bKash / Stripe) can be connected later. Amount is recorded in Firestore when Firebase is configured.</p>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer"></div>
+  <script src="../js/firebase-config.js"></script>
+  <script src="../js/common.js"></script>
+  <script>
+    function selectAmount(amt) {
+      document.getElementById("customAmount").value = amt;
+      document.querySelectorAll(".amount-btn").forEach((b) =>
+        b.classList.remove("border-red-500", "bg-red-500/20")
+      );
+      if (event && event.target) {
+        event.target.classList.add("border-red-500", "bg-red-500/20");
+      }
+    }
+
+    async function donate() {
+      const amt = document.getElementById("customAmount").value;
+      if (!amt || Number(amt) < 1) {
+        showToast("Please enter a valid amount.", "error");
+        return;
+      }
+
+      const user = getCurrentUser();
+      const fb = await initFirebase();
+      if (!fb) {
+        showToast("Thank you! Firebase not configured yet — payment will be available soon.", "info");
+        return;
+      }
+
+      try {
+        const { collection, addDoc, serverTimestamp } = await getFirestoreFns();
+        await addDoc(collection(fb.db, "donations"), {
+          amount: Number(amt),
+          currency: "BDT",
+          userId: user?.uid || null,
+          userName: user?.name || "Anonymous",
+          createdAt: serverTimestamp()
+        });
+        showToast(`Thank you! ৳${amt} support recorded.`, "success");
+        document.getElementById("customAmount").value = "";
+        loadTotalFunding();
+      } catch (err) {
+        console.error(err);
+        showToast("Could not record donation. Try again later.", "error");
+      }
+    }
+
+    async function loadTotalFunding() {
+      const el = document.getElementById("totalFunding");
+      const fb = await initFirebase();
+      if (!fb) {
+        el.textContent = "৳0";
+        return;
+      }
+      try {
+        const { collection, getDocs } = await getFirestoreFns();
+        const snap = await getDocs(collection(fb.db, "donations"));
+        let total = 0;
+        snap.forEach((d) => {
+          total += Number(d.data().amount) || 0;
+        });
+        el.textContent = "৳" + total.toLocaleString("en-BD");
+      } catch {
+        el.textContent = "৳0";
+      }
+    }
+
+    loadTotalFunding();
+  </script>
+</body>
+</html>

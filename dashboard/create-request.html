@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Request - RoktoSeva</title>
+  <link rel="icon" href="../assets/favicon.ico" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body class="min-h-screen flex flex-col bg-[#070a13] text-white">
+  <div id="navbar"></div>
+
+  <main class="flex-1 relative py-12 px-4 sm:px-8">
+    <div class="max-w-2xl mx-auto">
+      <h1 class="text-3xl font-extrabold tracking-tight mb-2">
+        Create <span class="text-red-500">Blood Request</span>
+      </h1>
+      <p class="text-slate-400 text-sm mb-8">Fill in the patient details to post an emergency blood request.</p>
+
+      <form id="requestForm" class="bg-[#0c101f]/70 border border-white/5 rounded-2xl p-6 sm:p-8 space-y-5" novalidate>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div>
+            <label class="form-label" for="patientName">Patient Name</label>
+            <input type="text" id="patientName" name="patientName" required class="form-input" placeholder="Patient full name" />
+          </div>
+          <div>
+            <label class="form-label" for="bloodGroup">Blood Group Needed</label>
+            <select id="bloodGroup" name="bloodGroup" required class="form-input">
+              <option value="">Select</option>
+              <option value="A+">A+</option><option value="A-">A-</option>
+              <option value="B+">B+</option><option value="B-">B-</option>
+              <option value="AB+">AB+</option><option value="AB-">AB-</option>
+              <option value="O+">O+</option><option value="O-">O-</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label" for="hospital">Hospital / Clinic</label>
+            <input type="text" id="hospital" name="hospital" required class="form-input" placeholder="Hospital name" />
+          </div>
+          <div>
+            <label class="form-label" for="dateNeeded">Date Needed</label>
+            <input type="date" id="dateNeeded" name="dateNeeded" required class="form-input" />
+          </div>
+          <div>
+            <label class="form-label" for="reqDistrict">District</label>
+            <select name="district" id="reqDistrict" required class="form-input">
+              <option value="">Select District</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label" for="reqUpazila">Upazila</label>
+            <select name="upazila" id="reqUpazila" required disabled class="form-input">
+              <option value="">Select District First</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label" for="status">Urgency</label>
+            <select id="status" name="status" class="form-input">
+              <option value="Pending">Normal</option>
+              <option value="Urgent">Urgent</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label" for="phone">Contact Phone</label>
+            <input type="tel" id="phone" name="phone" required class="form-input" placeholder="01XXXXXXXXX" />
+          </div>
+        </div>
+        <div>
+          <label class="form-label" for="notes">Additional Notes (optional)</label>
+          <textarea id="notes" name="notes" rows="3" class="form-input resize-none" placeholder="Any special instructions..."></textarea>
+        </div>
+        <button type="submit" id="submitBtn" class="w-full py-3.5 bg-gradient-to-r from-red-600 to-rose-600 rounded-xl text-white font-bold uppercase tracking-widest shadow-[0_4px_25px_rgba(220,38,38,0.25)] hover:shadow-[0_4px_35px_rgba(220,38,38,0.45)] transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+          <span id="submitBtnText">Post Request</span>
+          <span id="submitSpinner" class="spinner hidden"></span>
+        </button>
+      </form>
+    </div>
+  </main>
+
+  <div id="footer"></div>
+  <script src="../js/locationData.js"></script>
+  <script src="../js/firebase-config.js"></script>
+  <script src="../js/common.js"></script>
+  <script>
+    const user = requireAuth();
+
+    const distSel = document.getElementById("reqDistrict");
+    const upaSel = document.getElementById("reqUpazila");
+    districts.sort((a, b) => a.name.localeCompare(b.name)).forEach((d) => {
+      const o = document.createElement("option");
+      o.value = d.id;
+      o.textContent = d.name;
+      distSel.appendChild(o);
+    });
+    distSel.addEventListener("change", () => {
+      const id = distSel.value;
+      upaSel.innerHTML = "";
+      if (!id) {
+        upaSel.disabled = true;
+        upaSel.innerHTML = '<option value="">Select District First</option>';
+        return;
+      }
+      const filtered = upazilas
+        .filter((u) => u.district_id === id)
+        .sort((a, b) => a.name.localeCompare(b.name));
+      upaSel.disabled = false;
+      upaSel.innerHTML = '<option value="">Select Upazila</option>';
+      filtered.forEach((u) => {
+        const o = document.createElement("option");
+        o.value = u.name;
+        o.textContent = u.name;
+        upaSel.appendChild(o);
+      });
+    });
+
+    // Min date = today
+    const dateInput = document.getElementById("dateNeeded");
+    const today = new Date().toISOString().split("T")[0];
+    dateInput.setAttribute("min", today);
+
+    document.getElementById("requestForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById("submitBtn");
+      const btnText = document.getElementById("submitBtnText");
+      const spinner = document.getElementById("submitSpinner");
+
+      const patientName = document.getElementById("patientName").value.trim();
+      const bloodGroup = document.getElementById("bloodGroup").value;
+      const hospital = document.getElementById("hospital").value.trim();
+      const dateNeeded = document.getElementById("dateNeeded").value;
+      const districtId = distSel.value;
+      const upazila = upaSel.value;
+      const status = document.getElementById("status").value;
+      const phone = document.getElementById("phone").value.trim().replace(/\s|-/g, "");
+      const notes = document.getElementById("notes").value.trim();
+      const districtName = districts.find((d) => d.id === districtId)?.name || "";
+
+      if (!patientName || !bloodGroup || !hospital || !dateNeeded || !districtId || !upazila) {
+        showToast("Please fill all required fields.", "error");
+        return;
+      }
+      if (!isValidBDPhone(phone)) {
+        showToast("Enter a valid BD phone (01XXXXXXXXX).", "error");
+        return;
+      }
+
+      btn.disabled = true;
+      btnText.textContent = "Posting...";
+      spinner.classList.remove("hidden");
+
+      try {
+        const fb = await initFirebase();
+        if (!fb) {
+          showToast("Firebase is not configured. Add your keys in js/firebase-config.js", "error");
+          btn.disabled = false;
+          btnText.textContent = "Post Request";
+          spinner.classList.add("hidden");
+          return;
+        }
+
+        const { collection, addDoc, serverTimestamp } = await getFirestoreFns();
+        await addDoc(collection(fb.db, "requests"), {
+          patientName,
+          bloodGroup,
+          hospital,
+          dateNeeded,
+          district: districtName,
+          upazila,
+          status,
+          phone,
+          notes,
+          userId: user.uid || user.email,
+          userName: user.name || "",
+          createdAt: serverTimestamp()
+        });
+
+        showToast("Blood request posted successfully!", "success");
+        setTimeout(() => {
+          window.location.href = "my-requests.html";
+        }, 1000);
+      } catch (err) {
+        console.error(err);
+        showToast(err.message || "Failed to post request.", "error");
+        btn.disabled = false;
+        btnText.textContent = "Post Request";
+        spinner.classList.add("hidden");
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profile - RoktoSeva</title>
+  <link rel="icon" href="../assets/favicon.ico" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body class="min-h-screen flex flex-col bg-[#070a13] text-white">
+  <div id="navbar"></div>
+
+  <main class="flex-1 relative py-12 px-4 sm:px-8">
+    <div class="max-w-xl mx-auto">
+      <h1 class="text-3xl font-extrabold tracking-tight mb-8">My <span class="text-red-500">Profile</span></h1>
+
+      <div class="bg-[#0c101f]/70 border border-white/5 rounded-2xl p-6 sm:p-8">
+        <div class="flex items-center gap-4 mb-8">
+          <img id="profileImg" src="https://placehold.co/100x100/1e293b/ef4444?text=U" alt="Avatar" class="w-20 h-20 rounded-full border-2 border-red-500/40 object-cover">
+          <div>
+            <h2 id="profileName" class="text-xl font-bold">—</h2>
+            <p id="profileEmail" class="text-sm text-slate-400">—</p>
+            <span class="inline-block mt-1 text-[10px] text-red-400 font-bold uppercase tracking-widest bg-red-500/10 px-2 py-0.5 rounded-md border border-red-500/20">Donor</span>
+          </div>
+        </div>
+
+        <div class="space-y-4 text-sm">
+          <div class="flex justify-between border-b border-white/5 pb-3">
+            <span class="text-slate-500">Blood Group</span>
+            <span id="profileBlood" class="font-bold text-red-400">—</span>
+          </div>
+          <div class="flex justify-between border-b border-white/5 pb-3">
+            <span class="text-slate-500">Phone</span>
+            <span id="profilePhone" class="font-medium">—</span>
+          </div>
+          <div class="flex justify-between border-b border-white/5 pb-3">
+            <span class="text-slate-500">District</span>
+            <span id="profileDistrict" class="font-medium">—</span>
+          </div>
+          <div class="flex justify-between border-b border-white/5 pb-3">
+            <span class="text-slate-500">Upazila</span>
+            <span id="profileUpazila" class="font-medium">—</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-500">Role</span>
+            <span class="font-medium capitalize" id="profileRole">donor</span>
+          </div>
+        </div>
+
+        <button onclick="logout()" class="mt-8 w-full py-3 border border-red-500/30 text-red-400 rounded-xl hover:bg-red-500/10 transition-all font-bold text-sm uppercase tracking-wider">
+          Logout
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer"></div>
+  <script src="../js/firebase-config.js"></script>
+  <script src="../js/common.js"></script>
+  <script>
+    const user = requireAuth();
+    if (user) {
+      document.getElementById("profileName").textContent = user.name || "—";
+      document.getElementById("profileEmail").textContent = user.email || "—";
+      document.getElementById("profileBlood").textContent = user.bloodGroup || "—";
+      document.getElementById("profilePhone").textContent = user.phone || "—";
+      document.getElementById("profileDistrict").textContent = user.district || "—";
+      document.getElementById("profileUpazila").textContent = user.upazila || "—";
+      document.getElementById("profileRole").textContent = user.role || "donor";
+      const initial = (user.name || "U").charAt(0).toUpperCase();
+      document.getElementById("profileImg").src =
+        user.image ||
+        `https://placehold.co/100x100/1e293b/ef4444?text=${initial}`;
+    }
+
+    // Optionally refresh from Firestore
+    (async () => {
+      if (!user || !user.uid) return;
+      const fb = await initFirebase();
+      if (!fb) return;
+      try {
+        const { doc, getDoc } = await getFirestoreFns();
+        const snap = await getDoc(doc(fb.db, "users", user.uid));
+        if (snap.exists()) {
+          const data = snap.data();
+          const updated = { ...user, ...data, uid: user.uid, email: user.email };
+          setCurrentUser(updated);
+          document.getElementById("profileName").textContent = updated.name || "—";
+          document.getElementById("profileBlood").textContent = updated.bloodGroup || "—";
+          document.getElementById("profilePhone").textContent = updated.phone || "—";
+          document.getElementById("profileDistrict").textContent = updated.district || "—";
+          document.getElementById("profileUpazila").textContent = updated.upazila || "—";
+          document.getElementById("profileRole").textContent = updated.role || "donor";
+        }
+      } catch (e) {
+        console.warn("Profile refresh failed", e);
+      }
+    })();
+  </script>
+</body>
+</html>
