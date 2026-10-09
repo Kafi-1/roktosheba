@@ -318,6 +318,93 @@ function isValidBDPhone(phone) {
   return /^01[3-9]\d{8}$/.test(String(phone).replace(/\s|-/g, ""));
 }
 
+// ============ IMGBB IMAGE UPLOAD ============
+const IMGBB_API_KEY = "bc4eb6fb6c77ea7ce729f4ec89687f2f";
+
+/**
+ * Upload image file to ImgBB. Returns image URL string or throws.
+ * @param {File} file
+ * @returns {Promise<string>} image URL
+ */
+async function uploadToImgBB(file) {
+  if (!file || !file.type.startsWith("image/")) {
+    throw new Error("Please select a valid image file.");
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    throw new Error("Image must be under 5MB.");
+  }
+  const formData = new FormData();
+  formData.append("image", file);
+  formData.append("key", IMGBB_API_KEY);
+
+  const res = await fetch("https://api.imgbb.com/1/upload", {
+    method: "POST",
+    body: formData,
+  });
+  const json = await res.json();
+  if (!json.success || !json.data?.url) {
+    throw new Error(json.error?.message || "Image upload failed.");
+  }
+  return json.data.url; // direct image URL
+}
+
+/**
+ * Check if donor is available based on last donation date.
+ * Whole blood: typically available after 90 days (3 months).
+ */
+function isDonorAvailable(lastDonationDate) {
+  if (!lastDonationDate) return true; // never donated → available
+  const last = new Date(lastDonationDate);
+  if (isNaN(last.getTime())) return true;
+  const days = (Date.now() - last.getTime()) / (1000 * 60 * 60 * 24);
+  return days >= 90;
+}
+
+function formatDonationDate(dateStr) {
+  if (!dateStr) return "Never";
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return "—";
+  return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+}
+
+/**
+ * Contact request for female donors (privacy) — stored in contactRequests for admins.
+ */
+async function createContactRequest(donorId, donorName) {
+  const user = getCurrentUser();
+  if (!user) {
+    showToast("Please login first to request contact.", "error");
+    setTimeout(() => {
+      window.location.href = (typeof BASE !== "undefined" ? BASE : "") + "login.html";
+    }, 1000);
+    return false;
+  }
+  try {
+    const fb = await initFirebase();
+    if (!fb) {
+      showToast("Firebase not connected.", "error");
+      return false;
+    }
+    const { collection, addDoc, serverTimestamp } = await getFirestoreFns();
+    await addDoc(collection(fb.db, "contactRequests"), {
+      donorId,
+      donorName: donorName || "",
+      requesterId: user.uid,
+      requesterName: user.name || "",
+      requesterPhone: user.phone || "",
+      requesterEmail: user.email || "",
+      status: "Pending",
+      createdAt: serverTimestamp()
+    });
+    showToast("Contact request sent! Admin will connect you with the donor.", "success");
+    return true;
+  } catch (err) {
+    console.error(err);
+    showToast(err.message || "Failed to send request.", "error");
+    return false;
+  }
+}
+
 // ============ INIT ============
 document.addEventListener("DOMContentLoaded", () => {
   renderNavbar();
