@@ -38,6 +38,19 @@
       </p>
 
       <form id="registerForm" class="grid grid-cols-1 sm:grid-cols-2 gap-5" novalidate>
+        <!-- Profile Photo -->
+        <div class="sm:col-span-2 flex flex-col items-center gap-3 mb-2">
+          <div class="relative">
+            <img id="photoPreview" src="https://placehold.co/120x120/1e293b/ef4444?text=Photo" alt="Preview"
+                 class="w-24 h-24 rounded-full border-2 border-red-500/40 object-cover bg-slate-800" />
+            <label for="profilePhoto" class="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-red-600 flex items-center justify-center cursor-pointer hover:bg-red-500 transition-colors border-2 border-[#0c101f]" title="Upload photo">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            </label>
+            <input type="file" id="profilePhoto" accept="image/*" class="hidden" />
+          </div>
+          <p class="text-[10px] text-slate-500 uppercase tracking-wider">Profile Photo (optional, max 5MB)</p>
+        </div>
+
         <div>
           <label class="form-label" for="name">Full Name</label>
           <input type="text" id="name" name="name" required minlength="2" placeholder="Your full name" class="form-input" />
@@ -49,6 +62,20 @@
         <div>
           <label class="form-label" for="phone">Phone (BD)</label>
           <input type="tel" id="phone" name="phone" required placeholder="01XXXXXXXXX" class="form-input" pattern="01[3-9][0-9]{8}" />
+        </div>
+        <div>
+          <label class="form-label" for="gender">Gender</label>
+          <select id="gender" name="gender" required class="form-input">
+            <option value="">Select Gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div id="guardianWrap" class="hidden">
+          <label class="form-label" for="guardianPhone">Guardian Phone (optional)</label>
+          <input type="tel" id="guardianPhone" name="guardianPhone" placeholder="01XXXXXXXXX" class="form-input" pattern="01[3-9][0-9]{8}" />
+          <p class="text-[10px] text-slate-500 mt-1">Female donors: personal number stays hidden.</p>
         </div>
         <div>
           <label class="form-label" for="blood_group">Blood Group</label>
@@ -75,6 +102,17 @@
           <select name="upazila" id="upazilaSelect" required disabled class="form-input">
             <option value="">Select District First</option>
           </select>
+        </div>
+        <div>
+          <label class="form-label" for="hasDonated">Donated Blood Before?</label>
+          <select id="hasDonated" name="hasDonated" class="form-input">
+            <option value="no">No, first time</option>
+            <option value="yes">Yes</option>
+          </select>
+        </div>
+        <div id="lastDonationWrap" class="hidden">
+          <label class="form-label" for="lastDonationDate">Last Donation Date</label>
+          <input type="date" id="lastDonationDate" name="lastDonationDate" class="form-input" />
         </div>
         <div>
           <label class="form-label" for="password">Password</label>
@@ -112,6 +150,49 @@
 
     const districtSelect = document.getElementById("districtSelect");
     const upazilaSelect = document.getElementById("upazilaSelect");
+    let selectedPhotoFile = null;
+
+    // Photo preview
+    document.getElementById("profilePhoto").addEventListener("change", (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      if (!file.type.startsWith("image/")) {
+        showToast("Please select an image file.", "error");
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        showToast("Image must be under 5MB.", "error");
+        return;
+      }
+      selectedPhotoFile = file;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        document.getElementById("photoPreview").src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // Show/hide last donation date
+    document.getElementById("hasDonated").addEventListener("change", (e) => {
+      const wrap = document.getElementById("lastDonationWrap");
+      if (e.target.value === "yes") {
+        wrap.classList.remove("hidden");
+      } else {
+        wrap.classList.add("hidden");
+        document.getElementById("lastDonationDate").value = "";
+      }
+    });
+
+    // Show guardian phone for female
+    document.getElementById("gender").addEventListener("change", (e) => {
+      const wrap = document.getElementById("guardianWrap");
+      if (e.target.value === "Female") {
+        wrap.classList.remove("hidden");
+      } else {
+        wrap.classList.add("hidden");
+        document.getElementById("guardianPhone").value = "";
+      }
+    });
 
     districts.sort((a, b) => a.name.localeCompare(b.name)).forEach((d) => {
       const opt = document.createElement("option");
@@ -150,9 +231,13 @@
       const name = document.getElementById("name").value.trim();
       const email = document.getElementById("email").value.trim();
       const phone = document.getElementById("phone").value.trim().replace(/\s|-/g, "");
+      const gender = document.getElementById("gender").value;
       const bloodGroup = document.getElementById("blood_group").value;
       const districtId = districtSelect.value;
       const upazila = upazilaSelect.value;
+      const hasDonated = document.getElementById("hasDonated").value === "yes";
+      const lastDonationDate = document.getElementById("lastDonationDate").value || null;
+      const guardianPhoneRaw = document.getElementById("guardianPhone")?.value?.trim().replace(/\s|-/g, "") || "";
       const password = document.getElementById("password").value;
       const confirm = document.getElementById("confirm_password").value;
       const districtName = districts.find((d) => d.id === districtId)?.name || "";
@@ -169,12 +254,24 @@
         showToast("Enter a valid BD phone (01XXXXXXXXX).", "error");
         return;
       }
+      if (!gender) {
+        showToast("Select your gender.", "error");
+        return;
+      }
       if (!bloodGroup) {
         showToast("Select your blood group.", "error");
         return;
       }
       if (!districtId || !upazila) {
         showToast("Select district and upazila.", "error");
+        return;
+      }
+      if (hasDonated && !lastDonationDate) {
+        showToast("Please enter your last donation date.", "error");
+        return;
+      }
+      if (guardianPhoneRaw && !isValidBDPhone(guardianPhoneRaw)) {
+        showToast("Enter a valid guardian phone (01XXXXXXXXX).", "error");
         return;
       }
       if (password.length < 6) {
@@ -200,41 +297,73 @@
           return;
         }
 
+        // Upload photo to ImgBB if selected
+        let imageUrl = "";
+        if (selectedPhotoFile) {
+          btnText.textContent = "Uploading photo...";
+          try {
+            imageUrl = await uploadToImgBB(selectedPhotoFile);
+          } catch (upErr) {
+            showToast(upErr.message || "Photo upload failed. Continuing without photo.", "error");
+          }
+        }
+
+        btnText.textContent = "Creating Account...";
         const { createUserWithEmailAndPassword } = await getAuthFns();
         const { doc, setDoc, serverTimestamp } = await getFirestoreFns();
 
         const cred = await createUserWithEmailAndPassword(fb.auth, email, password);
         const uid = cred.user.uid;
+        const available = isDonorAvailable(lastDonationDate);
 
         const profile = {
           uid,
           name,
           email,
           phone,
+          gender,
           bloodGroup,
           district: districtName,
           upazila,
           role: "donor",
-          image: "",
-          available: true,
+          image: imageUrl,
+          hasDonated,
+          lastDonationDate: lastDonationDate || null,
+          donationCount: hasDonated ? 1 : 0,
+          available,
+          guardianPhone: guardianPhoneRaw || null,
+          hidePhone: gender === "Female",
           createdAt: serverTimestamp()
         };
 
         await setDoc(doc(fb.db, "users", uid), profile);
+
+        // Send email verification (optional, non-blocking)
+        try {
+          const { sendEmailVerification } = await getAuthFns();
+          await sendEmailVerification(cred.user);
+        } catch (_) {}
 
         setCurrentUser({
           uid,
           name,
           email,
           phone,
+          gender,
           bloodGroup,
           district: districtName,
           upazila,
           role: "donor",
-          image: ""
+          image: imageUrl,
+          hasDonated,
+          lastDonationDate: lastDonationDate || null,
+          donationCount: hasDonated ? 1 : 0,
+          available,
+          guardianPhone: guardianPhoneRaw || null,
+          hidePhone: gender === "Female"
         });
 
-        showToast("Account created successfully! Redirecting...", "success");
+        showToast("Account created! Check email for verification. Redirecting...", "success");
         setTimeout(() => {
           window.location.href = "dashboard/index.html";
         }, 800);

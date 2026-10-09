@@ -46,7 +46,10 @@
           <label class="form-label" for="password">Password</label>
           <input type="password" id="password" name="password" required minlength="6" placeholder="••••••••" class="form-input" autocomplete="current-password" />
         </div>
-        <div class="pt-4">
+        <div class="flex justify-end">
+          <button type="button" id="forgotPasswordBtn" class="text-xs text-red-400 hover:text-red-300 font-medium">Forgot Password?</button>
+        </div>
+        <div class="pt-2">
           <button type="submit" id="loginBtn" class="w-full py-3.5 bg-gradient-to-r from-red-600 to-rose-600 border-0 rounded-xl text-white font-bold uppercase tracking-widest shadow-[0_4px_25px_rgba(220,38,38,0.25)] hover:shadow-[0_4px_35px_rgba(220,38,38,0.45)] transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2">
             <span id="loginBtnText">Login</span>
             <span id="loginSpinner" class="spinner hidden"></span>
@@ -70,6 +73,31 @@
     if (getCurrentUser()) {
       window.location.href = "dashboard/index.html";
     }
+
+    // Forgot Password
+    document.getElementById("forgotPasswordBtn").addEventListener("click", async () => {
+      const email = document.getElementById("email").value.trim();
+      if (!isValidEmail(email)) {
+        showToast("Enter your email address first, then click Forgot Password.", "error");
+        return;
+      }
+      try {
+        const fb = await initFirebase();
+        if (!fb) {
+          showToast("Firebase not configured.", "error");
+          return;
+        }
+        const { sendPasswordResetEmail } = await getAuthFns();
+        await sendPasswordResetEmail(fb.auth, email);
+        showToast("Password reset email sent! Check your inbox.", "success");
+      } catch (err) {
+        console.error(err);
+        let msg = "Could not send reset email.";
+        if (err.code === "auth/user-not-found") msg = "No account found with this email.";
+        else if (err.message) msg = err.message;
+        showToast(msg, "error");
+      }
+    });
 
     document.getElementById("loginForm").addEventListener("submit", async (e) => {
       e.preventDefault();

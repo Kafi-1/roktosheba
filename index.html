@@ -6,6 +6,9 @@
   <title>Home - RoktoSeva | Blood Donation Platform Bangladesh</title>
   <meta name="description" content="Find blood donors near you across Bangladesh. Browse emergency blood requests, register as a donor, and help save lives with RoktoSeva." />
   <link rel="icon" href="assets/favicon.ico" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#dc2626" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -124,6 +127,26 @@
       </div>
     </section>
 
+    <!-- AVAILABLE DONORS -->
+    <section class="relative bg-[#070a13] text-white py-20 px-4 sm:px-8 overflow-hidden border-t border-white/5">
+      <div class="max-w-7xl mx-auto relative z-10">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl md:text-4xl font-black uppercase tracking-tight mb-3">
+            Available <span class="text-red-500">Donors</span>
+          </h2>
+          <p class="text-slate-400 text-sm max-w-md mx-auto">Recent registered donors ready to help across Bangladesh.</p>
+        </div>
+        <div id="donorsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <!-- loaded by JS -->
+        </div>
+        <div class="text-center mt-12">
+          <a href="search.html" class="inline-block px-8 py-3 bg-red-600/10 border border-red-500/30 text-red-400 rounded-xl hover:bg-red-600 hover:text-white transition-all font-bold uppercase text-xs tracking-wider">
+            View All Donors
+          </a>
+        </div>
+      </div>
+    </section>
+
     <!-- GUIDELINES PREVIEW -->
     <section class="relative bg-[#070a13] py-16 px-4 sm:px-8 border-t border-white/5">
       <div class="max-w-7xl mx-auto text-center">
@@ -209,6 +232,8 @@
             <p class="text-xs">🏥 Hospital: <span class="text-slate-300 font-medium">${req.hospital || "—"}</span></p>
             <p class="text-xs">📍 Location: <span class="text-slate-300 font-medium">${req.upazila || ""}${req.upazila && req.district ? ", " : ""}${req.district || "—"}</span></p>
             <p class="text-xs">📅 Date Needed: <span class="text-slate-300 font-medium">${req.dateNeeded || "—"}</span></p>
+            ${req.unitsNeeded ? `<p class="text-xs">🩸 Units: <span class="text-slate-300 font-medium">${req.unitsNeeded}</span></p>` : ""}
+            ${req.patientAge ? `<p class="text-xs">👤 Age: <span class="text-slate-300 font-medium">${req.patientAge}</span></p>` : ""}
           </div>
           <div class="mt-6">
             <a href="search.html" class="block text-center w-full py-2.5 bg-white/5 border border-white/10 text-white rounded-xl hover:bg-red-600 hover:border-red-500 transition-all font-bold uppercase text-xs tracking-wider">
@@ -282,12 +307,30 @@
         document.getElementById("statRequests").textContent = String(allRequests.length);
         renderRequests(allRequests);
 
-        // Donor count
+        // Donor count + recent donors
         try {
           const usersSnap = await getDocs(collection(fb.db, "users"));
           document.getElementById("statDonors").textContent = String(usersSnap.size);
+
+          const donors = [];
+          usersSnap.forEach((docSnap) => {
+            const d = docSnap.data();
+            if (d.role && d.role !== "donor" && d.role !== "user") return;
+            donors.push({ id: docSnap.id, ...d });
+          });
+          // Prefer available, then recent
+          donors.sort((a, b) => {
+            const aAvail = a.available !== false && isDonorAvailable(a.lastDonationDate) ? 1 : 0;
+            const bAvail = b.available !== false && isDonorAvailable(b.lastDonationDate) ? 1 : 0;
+            if (bAvail !== aAvail) return bAvail - aAvail;
+            const ta = a.createdAt?.seconds || 0;
+            const tb = b.createdAt?.seconds || 0;
+            return tb - ta;
+          });
+          renderHomeDonors(donors.slice(0, 8));
         } catch {
           document.getElementById("statDonors").textContent = "0";
+          renderHomeDonors([]);
         }
       } catch (err) {
         console.error(err);
@@ -298,10 +341,42 @@
           "dashboard/create-request.html",
           "Create a request →"
         );
+        renderHomeDonors([]);
       }
     }
 
+    function renderHomeDonors(list) {
+      const grid = document.getElementById("donorsGrid");
+      if (!grid) return;
+      if (!list.length) {
+        grid.innerHTML = emptyStateHTML("No donors yet. Be the first!", "register.html", "Become a donor →");
+        return;
+      }
+      grid.innerHTML = list.map((d) => {
+        const initial = (d.name || "D").charAt(0).toUpperCase();
+        const photo = d.image || `https://placehold.co/100x100/1e293b/ef4444?text=${initial}`;
+        const avail = d.available !== false && isDonorAvailable(d.lastDonationDate);
+        const isFemale = (d.gender || "").toLowerCase() === "female";
+        return `
+        <div class="bg-[#0c101f]/70 border border-white/5 rounded-2xl p-5 hover:border-red-500/30 transition-all text-center">
+          <img src="${photo}" alt="${d.name || "Donor"}"
+               class="w-16 h-16 rounded-full object-cover border-2 border-red-500/30 mx-auto mb-3 bg-slate-800"
+               onerror="this.src='https://placehold.co/100x100/1e293b/ef4444?text=${initial}'" />
+          <h3 class="font-bold text-white text-sm truncate">${d.name || "Donor"}</h3>
+          <p class="text-[10px] text-red-400 font-bold mt-1">${d.bloodGroup || "—"}</p>
+          <p class="text-[10px] text-slate-500 mt-0.5 truncate">${d.district || ""}</p>
+          <span class="inline-block mt-2 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border ${avail ? "text-green-400 bg-green-500/10 border-green-500/20" : "text-yellow-400 bg-yellow-500/10 border-yellow-500/20"}">${avail ? "Available" : "Unavailable"}</span>
+          ${isFemale ? '<p class="text-[9px] text-slate-500 mt-1">Contact via Admin</p>' : ""}
+        </div>`;
+      }).join("");
+    }
+
     loadHomeData();
+
+    // Register PWA service worker
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("./sw.js").catch(() => {});
+    }
   </script>
 </body>
 </html>

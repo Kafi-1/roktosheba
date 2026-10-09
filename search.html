@@ -37,6 +37,19 @@
             <option value="All">All Districts</option>
           </select>
         </div>
+        <div>
+          <label class="form-label" for="searchUpazila">Upazila</label>
+          <select id="searchUpazila" class="form-input min-w-[160px]" disabled>
+            <option value="All">All Upazilas</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label" for="searchAvailable">Availability</label>
+          <select id="searchAvailable" class="form-input min-w-[140px]">
+            <option value="All">All</option>
+            <option value="yes">Available only</option>
+          </select>
+        </div>
         <button type="button" id="searchBtn" class="px-6 py-3 bg-gradient-to-r from-red-600 to-rose-600 rounded-xl text-white font-bold text-sm uppercase tracking-wider hover:shadow-[0_0_20px_rgba(239,68,68,0.4)] transition-all disabled:opacity-50 flex items-center gap-2">
           <span id="searchBtnText">Search</span>
           <span id="searchSpinner" class="spinner hidden"></span>
@@ -55,12 +68,70 @@
   <script src="js/common.js"></script>
   <script>
     const distSelect = document.getElementById("searchDistrict");
+    const upaSelect = document.getElementById("searchUpazila");
+
     districts.sort((a, b) => a.name.localeCompare(b.name)).forEach((d) => {
       const o = document.createElement("option");
       o.value = d.name;
       o.textContent = d.name;
+      o.dataset.id = d.id;
       distSelect.appendChild(o);
     });
+
+    distSelect.addEventListener("change", () => {
+      const name = distSelect.value;
+      upaSelect.innerHTML = '<option value="All">All Upazilas</option>';
+      if (name === "All") {
+        upaSelect.disabled = true;
+        return;
+      }
+      const dist = districts.find((d) => d.name === name);
+      if (!dist) {
+        upaSelect.disabled = true;
+        return;
+      }
+      upaSelect.disabled = false;
+      upazilas
+        .filter((u) => u.district_id === dist.id)
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .forEach((u) => {
+          const o = document.createElement("option");
+          o.value = u.name;
+          o.textContent = u.name;
+          upaSelect.appendChild(o);
+        });
+    });
+
+    async function requestContact(donorId, donorName) {
+      const user = getCurrentUser();
+      if (!user) {
+        showToast("Please login first to request contact.", "error");
+        setTimeout(() => (window.location.href = "login.html"), 1000);
+        return;
+      }
+      try {
+        const fb = await initFirebase();
+        if (!fb) {
+          showToast("Firebase not connected.", "error");
+          return;
+        }
+        const { collection, addDoc, serverTimestamp } = await getFirestoreFns();
+        await addDoc(collection(fb.db, "contactRequests"), {
+          donorId,
+          donorName: donorName || "",
+          requesterId: user.uid,
+          requesterName: user.name || "",
+          requesterPhone: user.phone || "",
+          requesterEmail: user.email || "",
+          status: "Pending",
+          createdAt: serverTimestamp()
+        });
+        showToast("Contact request sent! Admin will connect you with the donor.", "success");
+      } catch (err) {
+        console.error(err);
+        showToast(err.message || "Failed to send request.", "error");
+      }
+    }
 
     function renderDonors(list) {
       const grid = document.getElementById("searchResults");
@@ -70,24 +141,52 @@
       }
       grid.innerHTML = list.map((d) => {
         const initial = (d.name || "D").charAt(0).toUpperCase();
-        const phoneDisplay = d.phone
-          ? d.phone.replace(/(\d{5})\d{4}(\d{2})/, "$1****$2")
-          : "Hidden";
+        const photo = d.image || `https://placehold.co/100x100/1e293b/ef4444?text=${initial}`;
+        const isFemale = (d.gender || "").toLowerCase() === "female";
+        const avail = d.available !== false && isDonorAvailable(d.lastDonationDate);
+        const lastDon = formatDonationDate(d.lastDonationDate);
+
+        let phoneRow = "";
+        let actionBtn = "";
+
+        if (isFemale) {
+          phoneRow = `<p class="text-xs">📞 Phone: <span class="text-slate-400 font-medium">Hidden (Female donor)</span></p>`;
+          if (avail) {
+            actionBtn = `<button type="button" onclick="requestContact('${d.id || d.uid || ""}', '${(d.name || "").replace(/'/g, "\\'")}')" class="mt-5 block w-full text-center py-2.5 bg-white/5 border border-white/10 text-white rounded-xl hover:bg-red-600 hover:border-red-500 transition-all font-bold uppercase text-xs tracking-wider">Request Contact via Admin</button>`;
+          } else {
+            actionBtn = `<div class="mt-5 block text-center w-full py-2.5 bg-white/5 border border-white/5 text-slate-500 rounded-xl font-bold uppercase text-xs tracking-wider cursor-not-allowed">Unavailable</div>`;
+          }
+        } else {
+          const phoneDisplay = d.phone
+            ? d.phone.replace(/(\d{5})\d{4}(\d{2})/, "$1****$2")
+            : "Hidden";
+          phoneRow = `<p class="text-xs">📞 Phone: <span class="text-slate-300 font-medium">${phoneDisplay}</span></p>`;
+          if (d.phone && avail) {
+            actionBtn = `<a href="tel:${d.phone}" class="mt-5 block text-center w-full py-2.5 bg-white/5 border border-white/10 text-white rounded-xl hover:bg-red-600 hover:border-red-500 transition-all font-bold uppercase text-xs tracking-wider">Call Donor</a>`;
+          } else {
+            actionBtn = `<div class="mt-5 block text-center w-full py-2.5 bg-white/5 border border-white/5 text-slate-500 rounded-xl font-bold uppercase text-xs tracking-wider cursor-not-allowed">Unavailable</div>`;
+          }
+        }
+
         return `
         <div class="bg-[#0c101f]/70 border border-white/5 rounded-2xl p-6 hover:border-red-500/30 transition-all">
           <div class="flex items-center gap-4 mb-4">
-            <div class="w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500 font-black text-xl">${d.bloodGroup || "—"}</div>
+            <img src="${photo}" alt="${d.name || "Donor"}"
+                 class="w-14 h-14 rounded-2xl object-cover border border-red-500/20 bg-slate-800"
+                 onerror="this.src='https://placehold.co/100x100/1e293b/ef4444?text=${initial}'" />
             <div>
               <h3 class="font-bold text-white">${d.name || "Donor"}</h3>
               <p class="text-xs text-slate-400">${d.upazila || ""}${d.upazila && d.district ? ", " : ""}${d.district || ""}</p>
+              <span class="inline-block mt-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border ${avail ? "text-green-400 bg-green-500/10 border-green-500/20" : "text-yellow-400 bg-yellow-500/10 border-yellow-500/20"}">${avail ? "Available" : "Not Available"}</span>
             </div>
           </div>
           <div class="space-y-1.5 text-sm text-slate-400">
-            <p class="text-xs">📞 Phone: <span class="text-slate-300 font-medium">${phoneDisplay}</span></p>
             <p class="text-xs">🩸 Group: <span class="text-red-400 font-bold">${d.bloodGroup || "—"}</span></p>
-            ${d.available === false ? '<p class="text-xs text-yellow-500">Currently unavailable</p>' : '<p class="text-xs text-green-500">Available</p>'}
+            ${phoneRow}
+            <p class="text-xs">📅 Last Donation: <span class="text-slate-300 font-medium">${lastDon}</span></p>
+            ${d.donationCount ? `<p class="text-xs">❤️ Donations: <span class="text-slate-300 font-medium">${d.donationCount}</span></p>` : ""}
           </div>
-          ${d.phone ? `<a href="tel:${d.phone}" class="mt-5 block text-center w-full py-2.5 bg-white/5 border border-white/10 text-white rounded-xl hover:bg-red-600 hover:border-red-500 transition-all font-bold uppercase text-xs tracking-wider">Call Donor</a>` : ""}
+          ${actionBtn}
         </div>
       `;
       }).join("");
@@ -96,6 +195,8 @@
     document.getElementById("searchBtn").addEventListener("click", async () => {
       const blood = document.getElementById("searchBlood").value;
       const district = document.getElementById("searchDistrict").value;
+      const upazila = document.getElementById("searchUpazila").value;
+      const availableOnly = document.getElementById("searchAvailable").value === "yes";
       const btn = document.getElementById("searchBtn");
       const btnText = document.getElementById("searchBtnText");
       const spinner = document.getElementById("searchSpinner");
@@ -117,18 +218,18 @@
           return;
         }
 
-        const { collection, getDocs, query, where } = await getFirestoreFns();
-        let snap;
-
-        // Build query based on filters (client-side filter for flexibility)
-        snap = await getDocs(collection(fb.db, "users"));
+        const { collection, getDocs } = await getFirestoreFns();
+        const snap = await getDocs(collection(fb.db, "users"));
         let results = [];
         snap.forEach((docSnap) => {
           const d = docSnap.data();
           if (d.role && d.role !== "donor" && d.role !== "user") return;
           const matchBlood = blood === "All" || d.bloodGroup === blood;
           const matchDist = district === "All" || d.district === district;
-          if (matchBlood && matchDist) {
+          const matchUpa = upazila === "All" || d.upazila === upazila;
+          const avail = d.available !== false && isDonorAvailable(d.lastDonationDate);
+          const matchAvail = !availableOnly || avail;
+          if (matchBlood && matchDist && matchUpa && matchAvail) {
             results.push({ id: docSnap.id, ...d });
           }
         });
