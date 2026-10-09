@@ -62,8 +62,20 @@
             </select>
           </div>
           <div>
+            <label class="form-label" for="unitsNeeded">Units Needed</label>
+            <input type="number" id="unitsNeeded" name="unitsNeeded" min="1" max="20" value="1" required class="form-input" placeholder="1" />
+          </div>
+          <div>
+            <label class="form-label" for="patientAge">Patient Age (optional)</label>
+            <input type="number" id="patientAge" name="patientAge" min="0" max="120" class="form-input" placeholder="e.g. 35" />
+          </div>
+          <div>
             <label class="form-label" for="phone">Contact Phone</label>
             <input type="tel" id="phone" name="phone" required class="form-input" placeholder="01XXXXXXXXX" />
+          </div>
+          <div>
+            <label class="form-label" for="emergencyContact">Emergency Contact Name</label>
+            <input type="text" id="emergencyContact" name="emergencyContact" class="form-input" placeholder="Relative / guardian name" />
           </div>
         </div>
         <div>
@@ -132,7 +144,12 @@
       const districtId = distSel.value;
       const upazila = upaSel.value;
       const status = document.getElementById("status").value;
+      const unitsNeeded = parseInt(document.getElementById("unitsNeeded").value, 10) || 1;
+      const patientAge = document.getElementById("patientAge").value
+        ? parseInt(document.getElementById("patientAge").value, 10)
+        : null;
       const phone = document.getElementById("phone").value.trim().replace(/\s|-/g, "");
+      const emergencyContact = document.getElementById("emergencyContact").value.trim();
       const notes = document.getElementById("notes").value.trim();
       const districtName = districts.find((d) => d.id === districtId)?.name || "";
 
@@ -142,6 +159,10 @@
       }
       if (!isValidBDPhone(phone)) {
         showToast("Enter a valid BD phone (01XXXXXXXXX).", "error");
+        return;
+      }
+      if (unitsNeeded < 1) {
+        showToast("Units needed must be at least 1.", "error");
         return;
       }
 
@@ -168,7 +189,10 @@
           district: districtName,
           upazila,
           status,
+          unitsNeeded,
+          patientAge,
           phone,
+          emergencyContact: emergencyContact || null,
           notes,
           userId: user.uid || user.email,
           userName: user.name || "",

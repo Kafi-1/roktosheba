@@ -82,31 +82,44 @@
     if (user) {
       document.getElementById("userName").textContent = user.name || "Donor";
       document.getElementById("userBlood").textContent = user.bloodGroup || "—";
+      const avail = user.available !== false && isDonorAvailable(user.lastDonationDate);
+      document.getElementById("userStatus").textContent = avail ? "Available" : "Unavailable";
+      document.getElementById("userStatus").classList.toggle("text-red-500", !avail);
+      document.getElementById("statDonations").textContent = String(user.donationCount ?? 0);
     }
 
     async function loadDashboardStats() {
       if (!user || !user.uid) {
         document.getElementById("statMyRequests").textContent = "0";
-        document.getElementById("statDonations").textContent = "0";
         return;
       }
       const fb = await initFirebase();
       if (!fb) {
         document.getElementById("statMyRequests").textContent = "0";
-        document.getElementById("statDonations").textContent = "0";
         return;
       }
       try {
-        const { collection, getDocs, query, where } = await getFirestoreFns();
+        const { collection, getDocs, query, where, doc, getDoc } = await getFirestoreFns();
         const snap = await getDocs(
           query(collection(fb.db, "requests"), where("userId", "==", user.uid))
         );
         document.getElementById("statMyRequests").textContent = String(snap.size);
-        document.getElementById("statDonations").textContent = "0";
+
+        // Refresh user profile for donation count / availability
+        const profileSnap = await getDoc(doc(fb.db, "users", user.uid));
+        if (profileSnap.exists()) {
+          const data = profileSnap.data();
+          const donationCount = data.donationCount ?? 0;
+          document.getElementById("statDonations").textContent = String(donationCount);
+          const avail = data.available !== false && isDonorAvailable(data.lastDonationDate);
+          document.getElementById("userStatus").textContent = avail ? "Available" : "Unavailable";
+          document.getElementById("userBlood").textContent = data.bloodGroup || "—";
+          const updated = { ...user, ...data, uid: user.uid, email: user.email };
+          setCurrentUser(updated);
+        }
       } catch (err) {
         console.error(err);
         document.getElementById("statMyRequests").textContent = "0";
-        document.getElementById("statDonations").textContent = "0";
       }
     }
     loadDashboardStats();

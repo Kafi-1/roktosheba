@@ -16,19 +16,32 @@
       <h1 class="text-3xl font-extrabold tracking-tight mb-8">My <span class="text-red-500">Profile</span></h1>
 
       <div class="bg-[#0c101f]/70 border border-white/5 rounded-2xl p-6 sm:p-8">
-        <div class="flex items-center gap-4 mb-8">
-          <img id="profileImg" src="https://placehold.co/100x100/1e293b/ef4444?text=U" alt="Avatar" class="w-20 h-20 rounded-full border-2 border-red-500/40 object-cover">
-          <div>
+        <!-- Photo + basic -->
+        <div class="flex flex-col sm:flex-row items-center gap-4 mb-8">
+          <div class="relative shrink-0">
+            <img id="profileImg" src="https://placehold.co/100x100/1e293b/ef4444?text=U" alt="Avatar"
+                 class="w-24 h-24 rounded-full border-2 border-red-500/40 object-cover bg-slate-800">
+            <label for="changePhoto" class="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-red-600 flex items-center justify-center cursor-pointer hover:bg-red-500 transition-colors border-2 border-[#0c101f]" title="Change photo">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            </label>
+            <input type="file" id="changePhoto" accept="image/*" class="hidden" />
+          </div>
+          <div class="text-center sm:text-left">
             <h2 id="profileName" class="text-xl font-bold">—</h2>
             <p id="profileEmail" class="text-sm text-slate-400">—</p>
-            <span class="inline-block mt-1 text-[10px] text-red-400 font-bold uppercase tracking-widest bg-red-500/10 px-2 py-0.5 rounded-md border border-red-500/20">Donor</span>
+            <span id="profileAvailableBadge" class="inline-block mt-1 text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md border">—</span>
           </div>
         </div>
 
-        <div class="space-y-4 text-sm">
+        <!-- View mode -->
+        <div id="viewMode" class="space-y-4 text-sm">
           <div class="flex justify-between border-b border-white/5 pb-3">
             <span class="text-slate-500">Blood Group</span>
             <span id="profileBlood" class="font-bold text-red-400">—</span>
+          </div>
+          <div class="flex justify-between border-b border-white/5 pb-3">
+            <span class="text-slate-500">Gender</span>
+            <span id="profileGender" class="font-medium">—</span>
           </div>
           <div class="flex justify-between border-b border-white/5 pb-3">
             <span class="text-slate-500">Phone</span>
@@ -42,15 +55,85 @@
             <span class="text-slate-500">Upazila</span>
             <span id="profileUpazila" class="font-medium">—</span>
           </div>
+          <div class="flex justify-between border-b border-white/5 pb-3">
+            <span class="text-slate-500">Donated Before</span>
+            <span id="profileHasDonated" class="font-medium">—</span>
+          </div>
+          <div class="flex justify-between border-b border-white/5 pb-3">
+            <span class="text-slate-500">Last Donation</span>
+            <span id="profileLastDonation" class="font-medium">—</span>
+          </div>
+          <div class="flex justify-between border-b border-white/5 pb-3">
+            <span class="text-slate-500">Total Donations</span>
+            <span id="profileDonationCount" class="font-medium">—</span>
+          </div>
           <div class="flex justify-between">
             <span class="text-slate-500">Role</span>
             <span class="font-medium capitalize" id="profileRole">donor</span>
           </div>
         </div>
 
-        <button onclick="logout()" class="mt-8 w-full py-3 border border-red-500/30 text-red-400 rounded-xl hover:bg-red-500/10 transition-all font-bold text-sm uppercase tracking-wider">
-          Logout
-        </button>
+        <!-- Edit mode (hidden by default) -->
+        <form id="editForm" class="hidden space-y-4">
+          <div>
+            <label class="form-label" for="editName">Full Name</label>
+            <input type="text" id="editName" class="form-input" required minlength="2" />
+          </div>
+          <div>
+            <label class="form-label" for="editPhone">Phone (BD)</label>
+            <input type="tel" id="editPhone" class="form-input" required pattern="01[3-9][0-9]{8}" />
+          </div>
+          <div>
+            <label class="form-label" for="editGender">Gender</label>
+            <select id="editGender" class="form-input" required>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label" for="editBlood">Blood Group</label>
+            <select id="editBlood" class="form-input" required>
+              <option value="A+">A+</option><option value="A-">A-</option>
+              <option value="B+">B+</option><option value="B-">B-</option>
+              <option value="AB+">AB+</option><option value="AB-">AB-</option>
+              <option value="O+">O+</option><option value="O-">O-</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label" for="editHasDonated">Donated Blood Before?</label>
+            <select id="editHasDonated" class="form-input">
+              <option value="no">No, first time</option>
+              <option value="yes">Yes</option>
+            </select>
+          </div>
+          <div id="editLastDonationWrap">
+            <label class="form-label" for="editLastDonation">Last Donation Date</label>
+            <input type="date" id="editLastDonation" class="form-input" />
+          </div>
+          <div>
+            <label class="form-label" for="editDonationCount">Total Donations</label>
+            <input type="number" id="editDonationCount" class="form-input" min="0" value="0" />
+          </div>
+          <div class="flex gap-3 pt-2">
+            <button type="submit" id="saveBtn" class="flex-1 py-3 bg-gradient-to-r from-red-600 to-rose-600 rounded-xl text-white font-bold text-sm uppercase tracking-wider disabled:opacity-50 flex items-center justify-center gap-2">
+              <span id="saveBtnText">Save Changes</span>
+              <span id="saveSpinner" class="spinner hidden"></span>
+            </button>
+            <button type="button" id="cancelEditBtn" class="px-5 py-3 border border-white/10 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-all font-bold text-sm uppercase tracking-wider">
+              Cancel
+            </button>
+          </div>
+        </form>
+
+        <div id="actionBtns" class="mt-8 flex flex-col gap-3">
+          <button id="editProfileBtn" class="w-full py-3 bg-white/5 border border-white/10 text-white rounded-xl hover:bg-white/10 transition-all font-bold text-sm uppercase tracking-wider">
+            Edit Profile
+          </button>
+          <button onclick="logout()" class="w-full py-3 border border-red-500/30 text-red-400 rounded-xl hover:bg-red-500/10 transition-all font-bold text-sm uppercase tracking-wider">
+            Logout
+          </button>
+        </div>
       </div>
     </div>
   </main>
@@ -59,44 +142,203 @@
   <script src="../js/firebase-config.js"></script>
   <script src="../js/common.js"></script>
   <script>
-    const user = requireAuth();
-    if (user) {
-      document.getElementById("profileName").textContent = user.name || "—";
-      document.getElementById("profileEmail").textContent = user.email || "—";
-      document.getElementById("profileBlood").textContent = user.bloodGroup || "—";
-      document.getElementById("profilePhone").textContent = user.phone || "—";
-      document.getElementById("profileDistrict").textContent = user.district || "—";
-      document.getElementById("profileUpazila").textContent = user.upazila || "—";
-      document.getElementById("profileRole").textContent = user.role || "donor";
-      const initial = (user.name || "U").charAt(0).toUpperCase();
+    let currentUser = requireAuth();
+    let selectedPhotoFile = null;
+
+    function fillView(u) {
+      document.getElementById("profileName").textContent = u.name || "—";
+      document.getElementById("profileEmail").textContent = u.email || "—";
+      document.getElementById("profileBlood").textContent = u.bloodGroup || "—";
+      document.getElementById("profileGender").textContent = u.gender || "—";
+      document.getElementById("profilePhone").textContent = u.phone || "—";
+      document.getElementById("profileDistrict").textContent = u.district || "—";
+      document.getElementById("profileUpazila").textContent = u.upazila || "—";
+      document.getElementById("profileHasDonated").textContent = u.hasDonated ? "Yes" : "No";
+      document.getElementById("profileLastDonation").textContent = formatDonationDate(u.lastDonationDate);
+      document.getElementById("profileDonationCount").textContent = String(u.donationCount ?? 0);
+      document.getElementById("profileRole").textContent = u.role || "donor";
+
+      const initial = (u.name || "U").charAt(0).toUpperCase();
       document.getElementById("profileImg").src =
-        user.image ||
-        `https://placehold.co/100x100/1e293b/ef4444?text=${initial}`;
+        u.image || `https://placehold.co/100x100/1e293b/ef4444?text=${initial}`;
+
+      const avail = u.available !== false && isDonorAvailable(u.lastDonationDate);
+      const badge = document.getElementById("profileAvailableBadge");
+      if (avail) {
+        badge.textContent = "Available";
+        badge.className = "inline-block mt-1 text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md border text-green-400 bg-green-500/10 border-green-500/20";
+      } else {
+        badge.textContent = "Not Available";
+        badge.className = "inline-block mt-1 text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md border text-yellow-400 bg-yellow-500/10 border-yellow-500/20";
+      }
     }
 
-    // Optionally refresh from Firestore
+    function fillEdit(u) {
+      document.getElementById("editName").value = u.name || "";
+      document.getElementById("editPhone").value = u.phone || "";
+      document.getElementById("editGender").value = u.gender || "Male";
+      document.getElementById("editBlood").value = u.bloodGroup || "A+";
+      document.getElementById("editHasDonated").value = u.hasDonated ? "yes" : "no";
+      document.getElementById("editLastDonation").value = u.lastDonationDate || "";
+      document.getElementById("editDonationCount").value = u.donationCount ?? 0;
+      toggleLastDonationField();
+    }
+
+    function toggleLastDonationField() {
+      const wrap = document.getElementById("editLastDonationWrap");
+      if (document.getElementById("editHasDonated").value === "yes") {
+        wrap.classList.remove("hidden");
+      } else {
+        wrap.classList.add("hidden");
+      }
+    }
+
+    function showView() {
+      document.getElementById("viewMode").classList.remove("hidden");
+      document.getElementById("editForm").classList.add("hidden");
+      document.getElementById("actionBtns").classList.remove("hidden");
+    }
+
+    function showEdit() {
+      fillEdit(currentUser);
+      document.getElementById("viewMode").classList.add("hidden");
+      document.getElementById("editForm").classList.remove("hidden");
+      document.getElementById("actionBtns").classList.add("hidden");
+    }
+
+    if (currentUser) fillView(currentUser);
+
+    // Refresh from Firestore
     (async () => {
-      if (!user || !user.uid) return;
+      if (!currentUser || !currentUser.uid) return;
       const fb = await initFirebase();
       if (!fb) return;
       try {
         const { doc, getDoc } = await getFirestoreFns();
-        const snap = await getDoc(doc(fb.db, "users", user.uid));
+        const snap = await getDoc(doc(fb.db, "users", currentUser.uid));
         if (snap.exists()) {
           const data = snap.data();
-          const updated = { ...user, ...data, uid: user.uid, email: user.email };
-          setCurrentUser(updated);
-          document.getElementById("profileName").textContent = updated.name || "—";
-          document.getElementById("profileBlood").textContent = updated.bloodGroup || "—";
-          document.getElementById("profilePhone").textContent = updated.phone || "—";
-          document.getElementById("profileDistrict").textContent = updated.district || "—";
-          document.getElementById("profileUpazila").textContent = updated.upazila || "—";
-          document.getElementById("profileRole").textContent = updated.role || "donor";
+          currentUser = { ...currentUser, ...data, uid: currentUser.uid, email: currentUser.email };
+          // recompute available
+          currentUser.available = isDonorAvailable(currentUser.lastDonationDate);
+          setCurrentUser(currentUser);
+          fillView(currentUser);
         }
       } catch (e) {
         console.warn("Profile refresh failed", e);
       }
     })();
+
+    document.getElementById("editProfileBtn").addEventListener("click", showEdit);
+    document.getElementById("cancelEditBtn").addEventListener("click", showView);
+    document.getElementById("editHasDonated").addEventListener("change", toggleLastDonationField);
+
+    // Change photo
+    document.getElementById("changePhoto").addEventListener("change", async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      if (!file.type.startsWith("image/")) {
+        showToast("Please select an image file.", "error");
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        showToast("Image must be under 5MB.", "error");
+        return;
+      }
+      selectedPhotoFile = file;
+      // Preview immediately
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        document.getElementById("profileImg").src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+
+      // Auto-upload & save
+      try {
+        showToast("Uploading photo...", "info");
+        const imageUrl = await uploadToImgBB(file);
+        const fb = await initFirebase();
+        if (!fb || !currentUser?.uid) return;
+        const { doc, updateDoc } = await getFirestoreFns();
+        await updateDoc(doc(fb.db, "users", currentUser.uid), { image: imageUrl });
+        currentUser.image = imageUrl;
+        setCurrentUser(currentUser);
+        document.getElementById("profileImg").src = imageUrl;
+        showToast("Profile photo updated!", "success");
+      } catch (err) {
+        console.error(err);
+        showToast(err.message || "Photo upload failed.", "error");
+      }
+      selectedPhotoFile = null;
+      e.target.value = "";
+    });
+
+    // Save profile edits
+    document.getElementById("editForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById("saveBtn");
+      const btnText = document.getElementById("saveBtnText");
+      const spinner = document.getElementById("saveSpinner");
+
+      const name = document.getElementById("editName").value.trim();
+      const phone = document.getElementById("editPhone").value.trim().replace(/\s|-/g, "");
+      const gender = document.getElementById("editGender").value;
+      const bloodGroup = document.getElementById("editBlood").value;
+      const hasDonated = document.getElementById("editHasDonated").value === "yes";
+      const lastDonationDate = document.getElementById("editLastDonation").value || null;
+      const donationCount = parseInt(document.getElementById("editDonationCount").value, 10) || 0;
+
+      if (name.length < 2) {
+        showToast("Please enter your full name.", "error");
+        return;
+      }
+      if (!isValidBDPhone(phone)) {
+        showToast("Enter a valid BD phone (01XXXXXXXXX).", "error");
+        return;
+      }
+      if (hasDonated && !lastDonationDate) {
+        showToast("Please enter last donation date.", "error");
+        return;
+      }
+
+      btn.disabled = true;
+      btnText.textContent = "Saving...";
+      spinner.classList.remove("hidden");
+
+      try {
+        const fb = await initFirebase();
+        if (!fb || !currentUser?.uid) {
+          showToast("Not connected to Firebase.", "error");
+          return;
+        }
+        const available = isDonorAvailable(lastDonationDate);
+        const updates = {
+          name,
+          phone,
+          gender,
+          bloodGroup,
+          hasDonated,
+          lastDonationDate: lastDonationDate || null,
+          donationCount,
+          available
+        };
+        const { doc, updateDoc } = await getFirestoreFns();
+        await updateDoc(doc(fb.db, "users", currentUser.uid), updates);
+
+        currentUser = { ...currentUser, ...updates };
+        setCurrentUser(currentUser);
+        fillView(currentUser);
+        showView();
+        showToast("Profile updated successfully!", "success");
+      } catch (err) {
+        console.error(err);
+        showToast(err.message || "Update failed.", "error");
+      } finally {
+        btn.disabled = false;
+        btnText.textContent = "Save Changes";
+        spinner.classList.add("hidden");
+      }
+    });
   </script>
 </body>
 </html>
