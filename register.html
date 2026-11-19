@@ -1,10 +1,22 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn" data-page="register">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Register - RoktoSeva</title>
+  <title>Become a Donor | RoktoSeva</title>
+  <meta name="description" content="Register as a blood donor and help save lives in Bangladesh." />
+  <meta name="robots" content="index, follow" />
+  <meta property="og:title" content="Become a Donor | RoktoSeva" />
+  <meta property="og:image" content="https://roktosheba.agi.bd/assets/og-image.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#dc2626" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="icon" href="assets/favicon.ico" />
+  <script src="js/site-config.js"></script>
+  <script src="js/i18n.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="css/style.css" />
 </head>
@@ -12,10 +24,10 @@
 
   <div id="navbar"></div>
 
-  <main class="flex-1 relative min-h-screen flex items-center justify-center px-4 py-12 overflow-hidden">
+  <main id="main" class="flex-1 relative min-h-screen flex items-center justify-center px-4 py-12 overflow-hidden">
     <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-red-600/5 rounded-full blur-[140px] -z-10"></div>
 
-    <div class="w-full max-w-2xl backdrop-blur-xl bg-[#0c101f]/80 border border-white/5 rounded-3xl p-8 shadow-[0_20px_50px_rgba(0,0,0,0.6)] relative z-10">
+    <div class="w-full max-w-2xl animate-pop backdrop-blur-xl bg-[#0c101f]/80 border border-white/5 rounded-3xl p-8 shadow-[0_20px_50px_rgba(0,0,0,0.6)] relative z-10">
       <div class="flex justify-center mb-6">
         <div class="p-3 rounded-2xl bg-white/[0.03] border border-white/5 shadow-inner">
           <div class="flex items-center gap-2.5">
@@ -36,6 +48,8 @@
       <p class="text-center text-slate-400 text-sm mb-8 font-medium uppercase tracking-widest">
         Register as a blood donor
       </p>
+
+      <div id="googleBox"></div>
 
       <form id="registerForm" class="grid grid-cols-1 sm:grid-cols-2 gap-5" novalidate>
         <!-- Profile Photo -->
@@ -71,6 +85,10 @@
             <option value="Female">Female</option>
             <option value="Other">Other</option>
           </select>
+        </div>
+        <div>
+          <label class="form-label" for="age">Age</label>
+          <input type="number" id="age" name="age" min="18" max="60" required placeholder="18–60" class="form-input" inputmode="numeric" />
         </div>
         <div id="guardianWrap" class="hidden">
           <label class="form-label" for="guardianPhone">Guardian Phone (optional)</label>
@@ -123,8 +141,13 @@
           <input type="password" id="confirm_password" name="confirm_password" required minlength="6" placeholder="••••••••" class="form-input" autocomplete="new-password" />
         </div>
 
-        <div class="sm:col-span-2 pt-4">
-          <button type="submit" id="regBtn" class="w-full py-3.5 bg-gradient-to-r from-red-600 to-rose-600 border-0 rounded-xl text-white font-bold uppercase tracking-widest shadow-[0_4px_25px_rgba(220,38,38,0.25)] hover:shadow-[0_4px_35px_rgba(220,38,38,0.45)] transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2">
+        <label class="sm:col-span-2 flex items-start gap-3 text-xs text-slate-400 leading-relaxed cursor-pointer">
+          <input type="checkbox" id="consent" class="mt-0.5 w-4 h-4 accent-red-600 shrink-0" />
+          <span>I agree that my name, age, blood group and location will be visible to others on this platform.</span>
+        </label>
+
+        <div class="sm:col-span-2 pt-2">
+          <button type="submit" id="regBtn" class="w-full py-3.5 bg-gradient-to-r from-red-600 to-rose-600 btn-shine border-0 rounded-xl text-white font-bold uppercase tracking-widest shadow-[0_4px_25px_rgba(220,38,38,0.25)] hover:shadow-[0_4px_35px_rgba(220,38,38,0.45)] transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2">
             <span id="regBtnText">Register</span>
             <span id="regSpinner" class="spinner hidden"></span>
           </button>
@@ -144,9 +167,14 @@
   <script src="js/firebase-config.js"></script>
   <script src="js/common.js"></script>
   <script>
-    if (getCurrentUser()) {
-      window.location.href = "dashboard/index.html";
+    // ?complete=1 → signed-in (e.g. Google) user adds donor details instead of creating a new account
+    const completeMode = new URLSearchParams(location.search).has("complete");
+    if (completeMode) {
+      if (!getCurrentUser()) window.location.replace("login.html");
+    } else if (getCurrentUser()) {
+      window.location.href = getNext() || "dashboard/index.html";
     }
+    document.querySelectorAll('a[href="login.html"]').forEach((a) => (a.href = "login.html" + location.search));
 
     const districtSelect = document.getElementById("districtSelect");
     const upazilaSelect = document.getElementById("upazilaSelect");
@@ -222,6 +250,21 @@
       });
     });
 
+    if (completeMode) {
+      const cu = getCurrentUser() || {};
+      document.getElementById("googleBox").remove();
+      document.querySelector("h2").dataset.h = "complete"; window.i18n.apply();
+      document.getElementById("regBtnText").textContent = "Save Changes";
+      document.querySelector("h2 + p").textContent = "Add your donor details";
+      ["password", "confirm_password"].forEach((id) => {
+        const f = document.getElementById(id); f.required = false; f.closest("div").classList.add("hidden");
+      });
+      document.getElementById("name").value = cu.name || "";
+      const em = document.getElementById("email"); em.value = cu.email || ""; em.readOnly = true; em.classList.add("opacity-60");
+      if (cu.phone) document.getElementById("phone").value = cu.phone;
+      if (cu.age) document.getElementById("age").value = cu.age;
+    }
+
     document.getElementById("registerForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const btn = document.getElementById("regBtn");
@@ -232,6 +275,7 @@
       const email = document.getElementById("email").value.trim();
       const phone = document.getElementById("phone").value.trim().replace(/\s|-/g, "");
       const gender = document.getElementById("gender").value;
+      const age = parseInt(document.getElementById("age").value, 10);
       const bloodGroup = document.getElementById("blood_group").value;
       const districtId = districtSelect.value;
       const upazila = upazilaSelect.value;
@@ -242,145 +286,90 @@
       const confirm = document.getElementById("confirm_password").value;
       const districtName = districts.find((d) => d.id === districtId)?.name || "";
 
-      if (name.length < 2) {
-        showToast("Please enter your full name.", "error");
-        return;
-      }
-      if (!isValidEmail(email)) {
-        showToast("Please enter a valid email.", "error");
-        return;
-      }
-      if (!isValidBDPhone(phone)) {
-        showToast("Enter a valid BD phone (01XXXXXXXXX).", "error");
-        return;
-      }
-      if (!gender) {
-        showToast("Select your gender.", "error");
-        return;
-      }
-      if (!bloodGroup) {
-        showToast("Select your blood group.", "error");
-        return;
-      }
-      if (!districtId || !upazila) {
-        showToast("Select district and upazila.", "error");
-        return;
-      }
-      if (hasDonated && !lastDonationDate) {
-        showToast("Please enter your last donation date.", "error");
-        return;
-      }
-      if (guardianPhoneRaw && !isValidBDPhone(guardianPhoneRaw)) {
-        showToast("Enter a valid guardian phone (01XXXXXXXXX).", "error");
-        return;
-      }
-      if (password.length < 6) {
-        showToast("Password must be at least 6 characters.", "error");
-        return;
-      }
-      if (password !== confirm) {
-        showToast("Passwords do not match!", "error");
-        return;
-      }
+      if (name.length < 2 || name.length > 80) return showToast("Please enter your full name (2–80 characters).", "error");
+      if (!isValidEmail(email)) return showToast("Please enter a valid email.", "error");
+      if (!isValidBDPhone(phone)) return showToast("Enter a valid BD phone (01XXXXXXXXX).", "error");
+      if (!gender) return showToast("Select your gender.", "error");
+      if (!Number.isInteger(age) || age < 18 || age > 60) return showToast("Age must be between 18 and 60.", "error");
+      if (!bloodGroup) return showToast("Select your blood group.", "error");
+      if (!districtId || !upazila) return showToast("Select district and upazila.", "error");
+      if (hasDonated && !lastDonationDate) return showToast("Please enter your last donation date.", "error");
+      if (guardianPhoneRaw && !isValidBDPhone(guardianPhoneRaw)) return showToast("Enter a valid guardian phone (01XXXXXXXXX).", "error");
+      if (!completeMode && password.length < 6) return showToast("Password must be at least 6 characters.", "error");
+      if (!completeMode && password !== confirm) return showToast("Passwords do not match!", "error");
+      if (!document.getElementById("consent").checked) return showToast("Please accept the consent to continue.", "error");
 
+      const reset = () => { btn.disabled = false; btnText.textContent = _(completeMode ? "Save Changes" : "Register"); spinner.classList.add("hidden"); };
       btn.disabled = true;
-      btnText.textContent = "Creating Account...";
+      btnText.textContent = _("Creating Account...");
       spinner.classList.remove("hidden");
 
+      let authUser = null;
       try {
         const fb = await initFirebase();
-        if (!fb) {
-          showToast("Firebase is not configured yet. Add your keys in js/firebase-config.js", "error");
-          btn.disabled = false;
-          btnText.textContent = "Register";
-          spinner.classList.add("hidden");
+        if (!fb) { showToast("Service is temporarily unavailable.", "error"); return reset(); }
+
+        let imageUrl = "";
+        if (selectedPhotoFile) {
+          btnText.textContent = _("Uploading photo...");
+          try { imageUrl = await uploadToImgBB(selectedPhotoFile); }
+          catch (upErr) { showToast("Photo upload failed. Continuing without photo.", "error"); }
+          btnText.textContent = _("Creating Account...");
+        }
+
+        if (completeMode) {
+          const cu = getCurrentUser();
+          const { doc, setDoc } = await getFirestoreFns();
+          const update = {
+            uid: cu.uid, role: cu.role || "donor", name, phone, gender, age, bloodGroup,
+            district: districtName, upazila, hasDonated, lastDonationDate,
+            donationCount: hasDonated ? Math.max(1, cu.donationCount || 0) : cu.donationCount || 0,
+            available: isDonorAvailable(lastDonationDate),
+            guardianPhone: guardianPhoneRaw || null,
+            hidePhone: gender === "Female",
+            image: imageUrl || cu.image || ""
+          };
+          await setDoc(doc(fb.db, "users", cu.uid), update, { merge: true });
+          const merged = { ...cu, ...update };
+          setCurrentUser(merged);
+          await syncPublicProfile(merged);
+          showToast("Profile saved! Redirecting...", "success");
+          goAfterLogin(700);
           return;
         }
 
-        // Upload photo to ImgBB if selected
-        let imageUrl = "";
-        if (selectedPhotoFile) {
-          btnText.textContent = "Uploading photo...";
-          try {
-            imageUrl = await uploadToImgBB(selectedPhotoFile);
-          } catch (upErr) {
-            showToast(upErr.message || "Photo upload failed. Continuing without photo.", "error");
-          }
-        }
-
-        btnText.textContent = "Creating Account...";
         const { createUserWithEmailAndPassword } = await getAuthFns();
         const { doc, setDoc, serverTimestamp } = await getFirestoreFns();
-
         const cred = await createUserWithEmailAndPassword(fb.auth, email, password);
+        authUser = cred.user;
         const uid = cred.user.uid;
-        const available = isDonorAvailable(lastDonationDate);
 
         const profile = {
-          uid,
-          name,
-          email,
-          phone,
-          gender,
-          bloodGroup,
-          district: districtName,
-          upazila,
-          role: "donor",
-          image: imageUrl,
-          hasDonated,
-          lastDonationDate: lastDonationDate || null,
-          donationCount: hasDonated ? 1 : 0,
-          available,
+          uid, name, email, phone, gender, age, bloodGroup,
+          district: districtName, upazila, role: "donor", image: imageUrl,
+          hasDonated, lastDonationDate, donationCount: hasDonated ? 1 : 0,
+          available: isDonorAvailable(lastDonationDate),
           guardianPhone: guardianPhoneRaw || null,
           hidePhone: gender === "Female",
           createdAt: serverTimestamp()
         };
-
         await setDoc(doc(fb.db, "users", uid), profile);
+        await syncPublicProfile(profile);
 
-        // Send email verification (optional, non-blocking)
-        try {
-          const { sendEmailVerification } = await getAuthFns();
-          await sendEmailVerification(cred.user);
-        } catch (_) {}
-
-        setCurrentUser({
-          uid,
-          name,
-          email,
-          phone,
-          gender,
-          bloodGroup,
-          district: districtName,
-          upazila,
-          role: "donor",
-          image: imageUrl,
-          hasDonated,
-          lastDonationDate: lastDonationDate || null,
-          donationCount: hasDonated ? 1 : 0,
-          available,
-          guardianPhone: guardianPhoneRaw || null,
-          hidePhone: gender === "Female"
-        });
-
-        showToast("Account created! Check email for verification. Redirecting...", "success");
-        setTimeout(() => {
-          window.location.href = "dashboard/index.html";
-        }, 800);
+        const { createdAt, ...cache } = profile;
+        setCurrentUser(cache);
+        showToast("Account created! Redirecting...", "success");
+        goAfterLogin(700);
       } catch (err) {
         console.error(err);
-        let msg = "Registration failed. Please try again.";
-        if (err.code === "auth/email-already-in-use") {
-          msg = "This email is already registered. Please login.";
-        } else if (err.code === "auth/weak-password") {
-          msg = "Password is too weak.";
-        } else if (err.message) {
-          msg = err.message;
-        }
-        showToast(msg, "error");
-        btn.disabled = false;
-        btnText.textContent = "Register";
-        spinner.classList.add("hidden");
+        // Do not leave an orphan auth account if the profile could not be saved
+        if (authUser) { try { await authUser.delete(); } catch {} }
+        const c = err && err.code;
+        showToast(
+          c === "auth/email-already-in-use" ? "This email is already registered. Please login."
+          : c === "auth/weak-password" ? "Password is too weak."
+          : "Registration failed. Please try again.", "error");
+        reset();
       }
     });
   </script>

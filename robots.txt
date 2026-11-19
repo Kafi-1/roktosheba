@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard/
+Disallow: /admin/
+Disallow: /login.html
+Disallow: /donor.html
+
+Sitemap: https://roktosheba.agi.bd/sitemap.xml

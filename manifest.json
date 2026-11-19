@@ -1,23 +1,21 @@
 {
-  "name": "RoktoSeva - Blood Donation",
+  "name": "রক্তসেবা — RoktoSeva",
   "short_name": "RoktoSeva",
   "description": "Blood donation platform for Bangladesh. Find donors, post requests, save lives.",
+  "lang": "bn",
   "start_url": "/index.html",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#070a13",
   "theme_color": "#dc2626",
   "orientation": "portrait-primary",
   "icons": [
-    {
-      "src": "assets/favicon.ico",
-      "sizes": "48x48",
-      "type": "image/x-icon"
-    },
-    {
-      "src": "assets/roktoseba.jpg",
-      "sizes": "192x192",
-      "type": "image/jpeg",
-      "purpose": "any maskable"
-    }
+    { "src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Find Donors", "url": "/search.html" },
+    { "name": "Request Blood", "url": "/dashboard/create-request.html" }
   ]
 }

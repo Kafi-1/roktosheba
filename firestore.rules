@@ -1,0 +1,131 @@
+rules_version = '2';
+// RoktoSeva — Firestore security rules (production)
+// Publish: Firebase Console → Firestore Database → Rules → paste → Publish
+//
+//   users/{uid}            PRIVATE profile (owner/admin only)
+//   publicDonors/{uid}     PUBLIC safe fields (no phone/email)
+//   donorContacts/{uid}    phone — single-doc read for logged-in users only
+//   requests/{id}          PUBLIC request (no phone)
+//   requestContacts/{id}   phone — single-doc read for logged-in users only
+//   contactRequests/{id}   "contact female donor via admin" (admin reads)
+//   messages/{id}          contact form (admin reads)
+//   settings/site          site config / SEO / developer profile (public read, admin write)
+//   admins/{uid}           create manually in console to make someone admin
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function isOwner(uid) { return signedIn() && request.auth.uid == uid; }
+    function isAdmin() { return signedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)); }
+    function text(v, max) { return v is string && v.size() <= max; }
+    function isSuspended(uid) {
+      return exists(/databases/$(database)/documents/users/$(uid))
+        && get(/databases/$(database)/documents/users/$(uid)).data.get('suspended', false) == true;
+    }
+    // signed in AND not suspended by an admin
+    function okUser() { return signedIn() && !isSuspended(request.auth.uid); }
+    function validPublicDonor(uid) {
+      return request.resource.data.uid == uid
+        && text(request.resource.data.name, 80)
+        && (!('age' in request.resource.data) || request.resource.data.age == null || request.resource.data.age is int)
+        && request.resource.data.keys().hasOnly(['uid','name','gender','age','bloodGroup','district','upazila','image','lastDonationDate','donationCount','available','hidePhone','updatedAt']);
+    }
+
+    match /settings/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /admins/{uid} {
+      allow read: if isOwner(uid);
+      allow write: if false;
+    }
+
+    match /users/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow list: if isAdmin();
+      allow create: if isOwner(uid)
+        && request.resource.data.uid == uid
+        && request.resource.data.role == 'donor'
+        && !('suspended' in request.resource.data)
+        && text(request.resource.data.name, 80);
+      // owners cannot change their own "suspended" flag; admins can edit anything
+      allow update: if (isOwner(uid)
+          && request.resource.data.uid == uid
+          && request.resource.data.role == resource.data.role
+          && text(request.resource.data.name, 80)
+          && request.resource.data.get('suspended', false) == resource.data.get('suspended', false))
+        || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /publicDonors/{uid} {
+      allow read: if true;
+      // owner (unless suspended) or admin (needed to restore a suspended donor)
+      allow create, update: if validPublicDonor(uid) && ((isOwner(uid) && !isSuspended(uid)) || isAdmin());
+      allow delete: if isOwner(uid) || isAdmin();
+    }
+
+    match /donorContacts/{uid} {
+      allow get: if signedIn();          // no bulk listing → numbers cannot be scraped
+      allow list: if isAdmin();
+      allow create, update: if request.resource.data.uid == uid
+        && request.resource.data.keys().hasOnly(['uid','phone'])
+        && text(request.resource.data.phone, 20)
+        && ((isOwner(uid) && !isSuspended(uid)) || isAdmin());
+      allow delete: if isOwner(uid) || isAdmin();
+    }
+
+    match /requests/{id} {
+      allow read: if true;
+      allow create: if okUser()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.status in ['Pending','Urgent']
+        && request.resource.data.bloodGroup in ['A+','A-','B+','B-','AB+','AB-','O+','O-']
+        && text(request.resource.data.patientName, 80)
+        && text(request.resource.data.get('hospital', ''), 120)
+        && text(request.resource.data.get('notes', ''), 500)
+        && request.resource.data.unitsNeeded is int
+        && request.resource.data.unitsNeeded >= 1 && request.resource.data.unitsNeeded <= 20;
+      allow update: if (isOwner(resource.data.userId) || isAdmin())
+        && request.resource.data.userId == resource.data.userId
+        && request.resource.data.status in ['Pending','Urgent','Fulfilled','Cancelled'];
+      allow delete: if isOwner(resource.data.userId) || isAdmin();
+    }
+
+    match /requestContacts/{id} {
+      allow get: if signedIn();
+      allow list: if isAdmin();
+      allow create: if okUser()
+        && request.resource.data.userId == request.auth.uid
+        && text(request.resource.data.phone, 20)
+        && request.resource.data.keys().hasOnly(['userId','phone','emergencyContact']);
+      allow update: if isOwner(resource.data.userId)
+        && request.resource.data.userId == resource.data.userId
+        && request.resource.data.keys().hasOnly(['userId','phone','emergencyContact']);
+      allow delete: if isOwner(resource.data.userId) || isAdmin();
+    }
+
+    match /contactRequests/{id} {
+      allow create: if okUser()
+        && request.resource.data.requesterId == request.auth.uid
+        && request.resource.data.status == 'Pending'
+        && text(request.resource.data.donorId, 128)
+        && text(request.resource.data.donorName, 80)
+        && text(request.resource.data.requesterName, 80)
+        && text(request.resource.data.requesterPhone, 20)
+        && request.resource.data.keys().hasOnly(['donorId','donorName','requesterId','requesterName','requesterPhone','status','createdAt']);
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /messages/{id} {
+      allow create: if text(request.resource.data.name, 80)
+        && text(request.resource.data.email, 120)
+        && text(request.resource.data.subject, 150)
+        && text(request.resource.data.message, 2000)
+        && request.resource.data.read == false
+        && request.resource.data.keys().hasOnly(['name','email','subject','message','read','userId','createdAt']);
+      allow read, update, delete: if isAdmin();
+    }
+  }
+}

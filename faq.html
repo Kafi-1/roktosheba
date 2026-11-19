@@ -1,17 +1,29 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn" data-page="faq">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FAQ - RoktoSeva</title>
+  <title>Frequently Asked Questions | RoktoSeva</title>
+  <meta name="description" content="Answers to common questions about blood donation and RoktoSeva." />
+  <meta name="robots" content="index, follow" />
+  <meta property="og:title" content="Frequently Asked Questions | RoktoSeva" />
+  <meta property="og:image" content="https://roktosheba.agi.bd/assets/og-image.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#dc2626" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="icon" href="assets/favicon.ico" />
+  <script src="js/site-config.js"></script>
+  <script src="js/i18n.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body class="min-h-screen flex flex-col bg-[#070a13] text-white">
   <div id="navbar"></div>
 
-  <main class="flex-1 relative py-20 px-4 sm:px-8">
+  <main id="main" class="flex-1 relative py-20 px-4 sm:px-8">
     <div class="max-w-3xl mx-auto">
       <div class="text-center mb-12">
         <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight mb-3">
@@ -25,47 +37,148 @@
   </main>
 
   <div id="footer"></div>
+  <script src="js/firebase-config.js"></script>
   <script src="js/common.js"></script>
   <script>
     const faqs = [
-      { q: "What is RoktoSeva?", a: "RoktoSeva (রক্তসেবা — 'Blood Service') is a free blood donation platform built for Bangladesh. It connects blood donors with patients in urgent need through a real-time request system and smart donor search." },
-      { q: "Is RoktoSeva free to use?", a: "Yes, RoktoSeva is completely free for donors and patients. Creating an account, searching for donors, and making blood requests all cost nothing." },
-      { q: "Which areas does RoktoSeva cover?", a: "RoktoSeva covers all 64 districts of Bangladesh with upazila-level precision. You can search for donors or post requests from anywhere in the country." },
-      { q: "Who can donate blood?", a: "Generally, anyone aged 18–60 who weighs at least 50 kg and is in good health can donate blood. You should not donate if you have a fever, recent illness, pregnancy, or certain chronic conditions." },
-      { q: "How often can I donate blood?", a: "Whole blood can be donated once every 3 months (90 days). This gives your body enough time to replenish red blood cells." },
-      { q: "Does donating blood hurt?", a: "You may feel a small pinch when the needle is inserted, but the actual donation process (around 8–10 minutes) is generally painless." },
-      { q: "How do I register as a donor?", a: "Click 'Register' on the top navbar, fill in your details including blood group, district, and upazila, and submit. Your profile will be searchable by anyone looking for donors in your area." },
-      { q: "How do I request blood?", a: "Log in to your account and go to Dashboard → Create Donation Request. Fill in the required blood group, hospital location, and urgency level. Your request will go live immediately." },
-      { q: "Is my personal data safe?", a: "Yes. We use secure authentication. We never sell or share your personal information with third parties. Your contact details are only visible to verified users on the platform." },
-      { q: "What blood groups are supported?", a: "All 8 standard blood groups: A+, A−, B+, B−, AB+, AB−, O+, and O−. O− is the universal donor and is always in high demand." },
-    ];
+  {
+    "q": {
+      "en": "What is RoktoSeva?",
+      "bn": "রক্তসেবা কী?"
+    },
+    "a": {
+      "en": "RoktoSeva (রক্তসেবা — 'Blood Service') is a free blood donation platform built for Bangladesh. It connects blood donors with patients in urgent need through a live request system and easy donor search.",
+      "bn": "রক্তসেবা বাংলাদেশের জন্য তৈরি একটি বিনামূল্যের রক্তদান প্ল্যাটফর্ম। লাইভ অনুরোধ ব্যবস্থা ও সহজ ডোনার সার্চের মাধ্যমে এটি জরুরি প্রয়োজনে থাকা রোগীদের সাথে রক্তদাতাদের সংযুক্ত করে।"
+    }
+  },
+  {
+    "q": {
+      "en": "Is RoktoSeva free to use?",
+      "bn": "রক্তসেবা কি বিনামূল্যে ব্যবহার করা যায়?"
+    },
+    "a": {
+      "en": "Yes, RoktoSeva is completely free for donors and patients. Creating an account, searching for donors, and making blood requests all cost nothing.",
+      "bn": "হ্যাঁ, রক্তসেবা ডোনার ও রোগী উভয়ের জন্য সম্পূর্ণ বিনামূল্যে। অ্যাকাউন্ট খোলা, ডোনার খোঁজা ও রক্তের অনুরোধ করতে কোনো খরচ নেই।"
+    }
+  },
+  {
+    "q": {
+      "en": "Which areas does RoktoSeva cover?",
+      "bn": "কোন কোন এলাকা কভার করা হয়?"
+    },
+    "a": {
+      "en": "RoktoSeva covers all 64 districts of Bangladesh with upazila-level precision. You can search for donors or post requests from anywhere in the country.",
+      "bn": "রক্তসেবা বাংলাদেশের ৬৪টি জেলা ও উপজেলা পর্যায় পর্যন্ত কভার করে। দেশের যেকোনো জায়গা থেকে ডোনার খুঁজতে বা অনুরোধ করতে পারবেন।"
+    }
+  },
+  {
+    "q": {
+      "en": "Who can donate blood?",
+      "bn": "কারা রক্ত দিতে পারেন?"
+    },
+    "a": {
+      "en": "Generally, anyone aged 18–60 who weighs at least 50 kg and is in good health can donate blood. You should not donate if you have a fever, recent illness, pregnancy, or certain chronic conditions.",
+      "bn": "সাধারণত ১৮–৬০ বছর বয়সী, কমপক্ষে ৫০ কেজি ওজনের এবং সুস্থ যে কেউ রক্ত দিতে পারেন। জ্বর, সাম্প্রতিক অসুস্থতা, গর্ভাবস্থা বা কিছু দীর্ঘমেয়াদি রোগ থাকলে রক্ত দেওয়া উচিত নয়।"
+    }
+  },
+  {
+    "q": {
+      "en": "How often can I donate blood?",
+      "bn": "কত দিন পর পর রক্ত দেওয়া যায়?"
+    },
+    "a": {
+      "en": "Whole blood can be donated once every 3 months (90 days). This gives your body enough time to replenish red blood cells.",
+      "bn": "পূর্ণ রক্ত প্রতি ৩ মাসে (৯০ দিনে) একবার দেওয়া যায়। এতে শরীর লোহিত রক্তকণিকা পুনরায় তৈরির পর্যাপ্ত সময় পায়।"
+    }
+  },
+  {
+    "q": {
+      "en": "Does donating blood hurt?",
+      "bn": "রক্ত দিলে কি ব্যথা লাগে?"
+    },
+    "a": {
+      "en": "You may feel a small pinch when the needle is inserted, but the actual donation process (around 8–10 minutes) is generally painless.",
+      "bn": "সুই ফোটানোর সময় সামান্য চিমটির মতো লাগতে পারে, তবে রক্তদান প্রক্রিয়া (প্রায় ৮–১০ মিনিট) সাধারণত ব্যথাহীন।"
+    }
+  },
+  {
+    "q": {
+      "en": "How do I register as a donor?",
+      "bn": "ডোনার হিসেবে কীভাবে রেজিস্টার করব?"
+    },
+    "a": {
+      "en": "Click 'Register' on the top navbar, fill in your details including blood group, district, and upazila, and submit. Your donor card will then appear in search for people looking for donors in your area.",
+      "bn": "উপরের নেভবারে 'রেজিস্টার' চাপুন, রক্তের গ্রুপ, জেলা ও উপজেলাসহ তথ্য দিয়ে সাবমিট করুন। এরপর আপনার এলাকার মানুষ সার্চে আপনার ডোনার কার্ড দেখতে পাবে।"
+    }
+  },
+  {
+    "q": {
+      "en": "How do I request blood?",
+      "bn": "কীভাবে রক্তের অনুরোধ করব?"
+    },
+    "a": {
+      "en": "Log in to your account and go to Dashboard → Create Request. Fill in the blood group, hospital, date and urgency. Your request goes live immediately and donors can contact you.",
+      "bn": "অ্যাকাউন্টে লগইন করে ড্যাশবোর্ড → অনুরোধ তৈরি করুন-এ যান। রক্তের গ্রুপ, হাসপাতাল, তারিখ ও জরুরিতা দিন। অনুরোধটি সাথে সাথে লাইভ হবে এবং ডোনাররা আপনার সাথে যোগাযোগ করতে পারবেন।"
+    }
+  },
+  {
+    "q": {
+      "en": "Is my personal data safe?",
+      "bn": "আমার ব্যক্তিগত তথ্য কি নিরাপদ?"
+    },
+    "a": {
+      "en": "We use secure authentication. Phone numbers are only shown to logged-in users, and female donors' numbers are never shown publicly. We never sell your information.",
+      "bn": "আমরা নিরাপদ অথেনটিকেশন ব্যবহার করি। ফোন নম্বর শুধু লগইন করা ব্যবহারকারীদের দেখানো হয় এবং নারী ডোনারদের নম্বর কখনোই প্রকাশ্যে দেখানো হয় না। আমরা আপনার তথ্য বিক্রি করি না।"
+    }
+  },
+  {
+    "q": {
+      "en": "What blood groups are supported?",
+      "bn": "কোন কোন রক্তের গ্রুপ আছে?"
+    },
+    "a": {
+      "en": "All 8 standard blood groups: A+, A−, B+, B−, AB+, AB−, O+, and O−. O− is the universal donor and is always in high demand.",
+      "bn": "সব ৮টি রক্তের গ্রুপ: A+, A−, B+, B−, AB+, AB−, O+ ও O−। O− ইউনিভার্সাল ডোনার এবং এর চাহিদা সবসময় বেশি।"
+    }
+  }
+];
+    let openIdx = -1;
 
-    document.getElementById('faqList').innerHTML = faqs.map((f, i) => `
-      <div class="bg-[#0c101f]/70 border border-white/5 rounded-2xl overflow-hidden">
-        <button onclick="toggleFaq(${i})" class="w-full flex items-center justify-between p-5 text-left hover:bg-white/[0.02] transition-colors">
-          <span class="font-semibold text-sm sm:text-base pr-4">${f.q}</span>
-          <svg id="icon-${i}" class="w-5 h-5 text-red-500 flex-shrink-0 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-          </svg>
-        </button>
-        <div id="answer-${i}" class="hidden px-5 pb-5 text-sm text-slate-400 leading-relaxed border-t border-white/5 pt-4">
-          ${f.a}
-        </div>
-      </div>
-    `).join('');
-
+    function renderFaq() {
+      const lang = window.i18n.getLang();
+      document.getElementById("faqList").innerHTML = faqs.map((f, i) => `
+        <div class="glass-card rounded-2xl overflow-hidden reveal card-lift" style="--d:${i * 50}ms" translate="no">
+          <button onclick="toggleFaq(${i})" aria-expanded="${openIdx === i}" class="w-full flex items-center justify-between p-5 text-left hover:bg-white/[0.02] transition-colors">
+            <span class="font-semibold text-sm sm:text-base pr-4">${escapeHTML(f.q[lang])}</span>
+            <svg id="icon-${i}" class="w-5 h-5 text-red-500 flex-shrink-0 transition-transform duration-300" style="transform:rotate(${openIdx === i ? 180 : 0}deg)" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
+          </button>
+          <div id="answer-${i}" class="faq-answer ${openIdx === i ? "open" : ""}">
+            <div class="px-5 pb-5 text-sm text-slate-400 leading-relaxed border-t border-white/5 pt-4">${escapeHTML(f.a[lang])}</div>
+          </div>
+        </div>`).join("");
+      revealAll(document.getElementById("faqList"));
+    }
     function toggleFaq(i) {
-      const ans = document.getElementById('answer-' + i);
-      const icon = document.getElementById('icon-' + i);
-      const isOpen = !ans.classList.contains('hidden');
-      // Close all
-      document.querySelectorAll('[id^="answer-"]').forEach(el => el.classList.add('hidden'));
-      document.querySelectorAll('[id^="icon-"]').forEach(el => el.style.transform = 'rotate(0deg)');
-      if (!isOpen) {
-        ans.classList.remove('hidden');
-        icon.style.transform = 'rotate(180deg)';
+      const wasOpen = openIdx === i;
+      document.querySelectorAll(".faq-answer").forEach((el) => el.classList.remove("open"));
+      document.querySelectorAll('[id^="icon-"]').forEach((el) => (el.style.transform = "rotate(0deg)"));
+      document.querySelectorAll("#faqList button").forEach((b) => b.setAttribute("aria-expanded", "false"));
+      openIdx = wasOpen ? -1 : i;
+      if (!wasOpen) {
+        document.getElementById("answer-" + i).classList.add("open");
+        document.getElementById("icon-" + i).style.transform = "rotate(180deg)";
+        document.querySelectorAll("#faqList button")[i].setAttribute("aria-expanded", "true");
       }
     }
+    renderFaq();
+    window.addEventListener("langchange", renderFaq);
+
+    // FAQ structured data for Google rich results
+    const ld = document.createElement("script");
+    ld.type = "application/ld+json";
+    ld.textContent = JSON.stringify({ "@context": "https://schema.org", "@type": "FAQPage",
+      mainEntity: faqs.map((f) => ({ "@type": "Question", name: f.q.en, acceptedAnswer: { "@type": "Answer", text: f.a.en } })) });
+    document.head.appendChild(ld);
   </script>
 </body>
 </html>

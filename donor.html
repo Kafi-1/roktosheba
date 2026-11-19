@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="bn" data-page="donor">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Donor Profile | RoktoSeva</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <meta property="og:title" content="Donor Profile | RoktoSeva" />
+  <meta property="og:image" content="https://roktosheba.agi.bd/assets/og-image.png" />
+  <link rel="icon" href="assets/favicon.ico" />
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#dc2626" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <script src="js/site-config.js"></script>
+  <script src="js/i18n.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="min-h-screen flex flex-col bg-[#070a13] text-white">
+  <div id="navbar"></div>
+
+  <main id="main" class="flex-1 relative py-12 px-4 sm:px-8">
+    <div class="absolute top-1/4 left-1/2 -translate-x-1/2 w-[460px] h-[460px] bg-red-600/5 rounded-full blur-[110px] -z-10 pointer-events-none"></div>
+    <div class="max-w-2xl mx-auto">
+      <a href="search.html" class="inline-block text-sm text-slate-400 hover:text-red-400 transition-colors mb-6">← <span>Back to search</span></a>
+      <div id="donorView" class="space-y-5">
+        <div class="glass-card rounded-3xl p-8 skeleton-card"><div class="skeleton w-28 h-28 rounded-full mx-auto mb-5"></div><div class="skeleton h-6 w-1/2 mx-auto rounded mb-3"></div><div class="skeleton h-4 w-1/3 mx-auto rounded"></div></div>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer"></div>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/common.js"></script>
+  <script>
+    const donorId = new URLSearchParams(location.search).get("id");
+    const viewEl = document.getElementById("donorView");
+    const loggedIn = !!getCurrentUser();
+    let donor = null;
+
+    function addDays(dateStr, n) {
+      const d = new Date(dateStr);
+      d.setDate(d.getDate() + n);
+      return d;
+    }
+
+    function row(label, valueHTML) {
+      return `<div class="flex justify-between items-center gap-4 border-b border-white/5 pb-3 last:border-0 last:pb-0">
+        <span class="text-slate-500 text-sm">${label}</span><span class="text-sm font-semibold text-right">${valueHTML}</span></div>`;
+    }
+
+    function render() {
+      if (!donor) return;
+      const d = donor;
+      const name = d.name || "Donor";
+      const initial = name.charAt(0).toUpperCase();
+      const avail = d.available !== false && isDonorAvailable(d.lastDonationDate);
+      const hidePhone = d.hidePhone === true || (d.gender || "").toLowerCase() === "female";
+      const loc = [d.upazila, d.district].filter(Boolean).join(", ");
+      const count = Number(d.donationCount) || 0;
+      const nextDate = d.lastDonationDate ? addDays(d.lastDonationDate, 90) : null;
+      const nextText = !nextDate ? null : nextDate.getTime() <= Date.now() ? "Eligible now" : window.i18n.fmtDate(nextDate);
+
+      // history text
+      let history = "";
+      if (!count && !d.lastDonationDate) history = `<p class="text-sm text-slate-400">${_("No donation recorded yet")}</p>`;
+      else history = [
+        row(_("Total Donations"), window.i18n.fmtNum(count)),
+        row(_("Last Donation"), u(formatDonationDate(d.lastDonationDate))),
+        nextText ? row(_("Next eligible date"), nextText === "Eligible now" ? `<span class="text-green-400">${_("Eligible now")}</span>` : u(nextText)) : ""
+      ].join("");
+
+      // contact block
+      let contact;
+      if (!loggedIn) {
+        contact = `<a href="${loginUrl()}" class="block text-center w-full py-3 bg-white/5 border border-white/10 rounded-xl font-bold text-sm hover:bg-red-600 hover:border-red-500 transition-all">${_("Login to see contact")}</a>`;
+      } else if (hidePhone) {
+        contact = `<p class="text-xs text-slate-400 mb-3 leading-relaxed">${_("Phone is hidden to protect privacy. You can request contact through admin.")}</p>
+          <button type="button" id="adminReqBtn" class="w-full py-3 bg-white/5 border border-white/10 rounded-xl font-bold text-sm hover:bg-red-600 hover:border-red-500 transition-all disabled:opacity-50">${_("Request Contact via Admin")}</button>`;
+      } else {
+        contact = `<div id="phoneBox"><button type="button" id="showPhoneBtn" class="btn-shine w-full py-3 bg-gradient-to-r from-red-600 to-rose-600 rounded-xl font-bold text-sm disabled:opacity-50">${_("Show Phone")}</button></div>`;
+      }
+
+      const supportSubject = `Donor support: ${name} (${d.bloodGroup || ""})`;
+      const supportMsg = `Hello, I need help to contact this donor.\nName: ${name}\nBlood group: ${d.bloodGroup || ""}\nProfile: ${CFG.siteUrl}/donor.html?id=${donorId}`;
+      const supportHref = `contact.html?subject=${encodeURIComponent(supportSubject)}&message=${encodeURIComponent(supportMsg)}`;
+      const supportMail = (CFG.contact && CFG.contact.email) || "";
+
+      viewEl.innerHTML = `
+        <div class="glass-card rounded-3xl p-8 text-center reveal">
+          <div class="relative w-28 h-28 mx-auto mb-5">
+            <img src="${escapeHTML(safeImg(d.image, initial))}" alt="" class="w-28 h-28 rounded-full object-cover border-4 border-red-500/40 bg-slate-800 shadow-[0_0_40px_rgba(220,38,38,0.3)]"
+                 onerror="this.onerror=null;this.src='https://placehold.co/200x200/1e293b/ef4444?text=${encodeURIComponent(initial)}'" />
+            <span class="absolute -bottom-1 -right-1 min-w-[42px] px-2 py-1 rounded-full bg-red-600 text-white text-sm font-black border-4 border-[#0c101f]" translate="no">${escapeHTML(d.bloodGroup || "—")}</span>
+          </div>
+          <h1 class="text-2xl sm:text-3xl font-extrabold">${u(name)}</h1>
+          <p class="text-slate-400 text-sm mt-1">📍 ${u(loc || "—")}</p>
+          <span class="inline-block mt-3 text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-lg border ${avail ? "text-green-400 bg-green-500/10 border-green-500/20" : "text-yellow-400 bg-yellow-500/10 border-yellow-500/20"}">${avail ? _("Available") : _("Not Available")}</span>
+        </div>
+
+        <div class="glass-card rounded-3xl p-6 space-y-3 reveal" style="--d:80ms">
+          ${row(_("Name"), u(name))}
+          ${row(_("Age"), d.age ? `${window.i18n.fmtNum(d.age)} ${_("years")}` : `<span class="text-slate-500">${_("Not provided")}</span>`)}
+          ${row(_("Blood Group"), `<span class="text-red-400" translate="no">${escapeHTML(d.bloodGroup || "—")}</span>`)}
+          ${row(_("District"), u(d.district || "—"))}
+          ${row(_("Upazila"), u(d.upazila || "—"))}
+        </div>
+
+        <div class="glass-card rounded-3xl p-6 reveal" style="--d:120ms">
+          <h2 class="text-xs font-bold uppercase tracking-widest text-red-400 mb-4">${_("Donation History")}</h2>
+          <div class="space-y-3">${history}</div>
+          ${!avail && d.lastDonationDate ? `<p class="text-[11px] text-yellow-400/80 mt-4">${_("Currently resting between donations")}</p>` : ""}
+        </div>
+
+        <div class="glass-card rounded-3xl p-6 reveal" style="--d:160ms">
+          <h2 class="text-xs font-bold uppercase tracking-widest text-red-400 mb-4">${_("Contact Donor")}</h2>
+          ${contact}
+        </div>
+
+        <div class="glass-card rounded-3xl p-6 reveal" style="--d:200ms">
+          <h2 class="text-xs font-bold uppercase tracking-widest text-red-400 mb-2">${_("Admin Support")}</h2>
+          <p class="text-xs text-slate-400 mb-4 leading-relaxed">${_("Need help reaching this donor? Our support team can assist you.")}</p>
+          <div class="flex flex-col sm:flex-row gap-3">
+            <a href="${supportHref}" class="flex-1 text-center py-3 bg-white/5 border border-white/10 rounded-xl font-bold text-sm hover:bg-red-600 hover:border-red-500 transition-all">${_("Contact Admin Support")}</a>
+            ${supportMail ? `<a href="mailto:${escapeHTML(supportMail)}?subject=${encodeURIComponent(supportSubject)}" class="flex-1 text-center py-3 bg-white/5 border border-white/10 rounded-xl font-bold text-sm hover:bg-white/10 transition-all" translate="no">✉ ${escapeHTML(supportMail)}</a>` : ""}
+          </div>
+        </div>`;
+      revealAll(viewEl);
+
+      const showBtn = document.getElementById("showPhoneBtn");
+      if (showBtn) showBtn.addEventListener("click", revealPhone);
+      const reqBtn = document.getElementById("adminReqBtn");
+      if (reqBtn) reqBtn.addEventListener("click", async () => {
+        reqBtn.disabled = true;
+        const ok = await createContactRequest(donorId, donor.name);
+        if (!ok) reqBtn.disabled = false;
+      });
+    }
+
+    async function revealPhone(e) {
+      const btn = e.currentTarget;
+      btn.disabled = true;
+      try {
+        const fb = await initFirebase();
+        const { doc, getDoc } = await getFirestoreFns();
+        const snap = await getDoc(doc(fb.db, "donorContacts", donorId));
+        const phone = snap.exists() ? String(snap.data().phone || "").replace(/[^\d+]/g, "") : "";
+        if (!phone) throw new Error("none");
+        const wa = "https://wa.me/" + (phone.startsWith("+") ? phone.slice(1) : phone.startsWith("0") ? "88" + phone : phone);
+        document.getElementById("phoneBox").innerHTML = `
+          <div class="grid grid-cols-2 gap-3">
+            <a href="tel:${escapeHTML(phone)}" class="text-center py-3 bg-green-600 rounded-xl font-bold text-sm">📞 <span translate="no">${escapeHTML(phone)}</span></a>
+            <a href="${escapeHTML(wa)}" target="_blank" rel="noopener noreferrer" class="text-center py-3 bg-emerald-700/40 border border-emerald-500/30 rounded-xl font-bold text-sm hover:bg-emerald-600 transition-all">${_("WhatsApp")}</a>
+          </div>`;
+      } catch {
+        btn.disabled = false;
+        showToast("Could not load contact. Try again.", "error");
+      }
+    }
+
+    function showMessage(titleEN, textEN) {
+      viewEl.innerHTML = `<div class="glass-card rounded-3xl p-10 text-center">
+        <div class="text-4xl mb-3">🩸</div>
+        <h1 class="text-xl font-bold mb-2">${_(titleEN)}</h1>
+        <p class="text-slate-400 text-sm mb-6">${_(textEN)}</p>
+        <a href="search.html" class="inline-block px-6 py-3 bg-gradient-to-r from-red-600 to-rose-600 rounded-xl font-bold text-sm">${_("Search Donors")}</a></div>`;
+    }
+
+    async function loadDonor() {
+      if (!donorId) return showMessage("Donor not found", "This donor profile does not exist or was removed.");
+      try {
+        const fb = await initFirebase();
+        if (!fb) return showMessage("Donor not found", "Could not load this profile. Please try again.");
+        const { doc, getDoc } = await getFirestoreFns();
+        const snap = await getDoc(doc(fb.db, "publicDonors", donorId));
+        if (!snap.exists()) return showMessage("Donor not found", "This donor profile does not exist or was removed.");
+        donor = { id: snap.id, ...snap.data() };
+        render();
+      } catch (err) {
+        console.error(err);
+        showMessage("Donor not found", "Could not load this profile. Please try again.");
+      }
+    }
+    window.addEventListener("langchange", render);
+    loadDonor();
+  </script>
+</body>
+</html>

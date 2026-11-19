@@ -1,17 +1,29 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn" data-page="guidelines">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Guidelines - RoktoSeva</title>
+  <title>Blood Donation Guidelines | RoktoSeva</title>
+  <meta name="description" content="Eligibility, preparation and aftercare tips for safe blood donation." />
+  <meta name="robots" content="index, follow" />
+  <meta property="og:title" content="Blood Donation Guidelines | RoktoSeva" />
+  <meta property="og:image" content="https://roktosheba.agi.bd/assets/og-image.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#dc2626" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="icon" href="assets/favicon.ico" />
+  <script src="js/site-config.js"></script>
+  <script src="js/i18n.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body class="min-h-screen flex flex-col bg-[#070a13] text-white">
   <div id="navbar"></div>
 
-  <main class="flex-1 relative py-20 px-4 sm:px-8 overflow-hidden">
+  <main id="main" class="flex-1 relative py-20 px-4 sm:px-8 overflow-hidden">
     <div class="absolute top-1/4 right-0 w-[400px] h-[400px] bg-red-600/5 rounded-full blur-[120px] -z-10 pointer-events-none"></div>
 
     <div class="max-w-6xl mx-auto">
@@ -32,19 +44,19 @@
         </div>
         <h2 class="text-2xl font-extrabold mb-6">Who Can <span class="text-red-500">Donate?</span></h2>
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div class="bg-[#0c101f]/70 border border-white/5 rounded-2xl p-5 text-center">
+          <div class="reveal card-lift bg-[#0c101f]/70 border border-white/5 rounded-2xl p-5 text-center">
             <div class="text-2xl font-black text-red-500 mb-1">18–60</div>
             <div class="text-xs text-slate-400 uppercase tracking-wider">Age (Years)</div>
           </div>
-          <div class="bg-[#0c101f]/70 border border-white/5 rounded-2xl p-5 text-center">
+          <div class="reveal card-lift bg-[#0c101f]/70 border border-white/5 rounded-2xl p-5 text-center">
             <div class="text-2xl font-black text-red-500 mb-1">≥ 50 kg</div>
             <div class="text-xs text-slate-400 uppercase tracking-wider">Weight</div>
           </div>
-          <div class="bg-[#0c101f]/70 border border-white/5 rounded-2xl p-5 text-center">
+          <div class="reveal card-lift bg-[#0c101f]/70 border border-white/5 rounded-2xl p-5 text-center">
             <div class="text-2xl font-black text-red-500 mb-1">≥ 12.5</div>
             <div class="text-xs text-slate-400 uppercase tracking-wider">Hemoglobin (g/dL)</div>
           </div>
-          <div class="bg-[#0c101f]/70 border border-white/5 rounded-2xl p-5 text-center">
+          <div class="reveal card-lift bg-[#0c101f]/70 border border-white/5 rounded-2xl p-5 text-center">
             <div class="text-2xl font-black text-red-500 mb-1">90 Days</div>
             <div class="text-xs text-slate-400 uppercase tracking-wider">Between Donations</div>
           </div>
@@ -56,7 +68,7 @@
         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 mb-4">
           <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-red-400">Step 01</span>
         </div>
-        <h2 class="text-2xl font-extrabold mb-6">Before <span class="text-red-500">Donating</span></h2>
+        <h2 data-h="before" class="text-2xl font-extrabold mb-6">Before <span class="text-red-500">Donating</span></h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="beforeTips"></div>
       </div>
 
@@ -65,7 +77,7 @@
         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 mb-4">
           <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-red-400">Step 02</span>
         </div>
-        <h2 class="text-2xl font-extrabold mb-6">During <span class="text-red-500">Donation</span></h2>
+        <h2 data-h="during" class="text-2xl font-extrabold mb-6">During <span class="text-red-500">Donation</span></h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" id="duringTips"></div>
       </div>
 
@@ -74,54 +86,206 @@
         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 mb-4">
           <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-red-400">Step 03</span>
         </div>
-        <h2 class="text-2xl font-extrabold mb-6">After <span class="text-red-500">Donating</span></h2>
+        <h2 data-h="after" class="text-2xl font-extrabold mb-6">After <span class="text-red-500">Donating</span></h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="afterTips"></div>
       </div>
     </div>
   </main>
 
   <div id="footer"></div>
+  <script src="js/firebase-config.js"></script>
   <script src="js/common.js"></script>
   <script>
-    const beforeTips = [
-      { title: "Eat a healthy meal", desc: "Have a nutritious meal 2–3 hours before donating. Avoid fatty foods as they can affect blood tests." },
-      { title: "Stay well hydrated", desc: "Drink an extra 500 ml of water before your appointment. Good hydration makes the process easier and safer." },
-      { title: "Sleep well", desc: "Get at least 7–8 hours of sleep the night before. Fatigue can cause dizziness during or after donation." },
-      { title: "Avoid alcohol", desc: "Abstain from alcohol for at least 24 hours before donating. Alcohol dehydrates you and affects blood quality." },
-      { title: "Wear comfortable clothing", desc: "Wear a short-sleeve shirt or clothing with sleeves that roll up easily for quick access to your arm." },
-      { title: "Bring valid ID", desc: "Carry a valid national ID card or donor registration card if you have one." },
-    ];
-    const duringTips = [
-      { title: "Stay calm and relaxed", desc: "Anxiety can raise blood pressure. Take slow, deep breaths and focus on something positive." },
-      { title: "Inform staff of concerns", desc: "Tell the medical staff if you feel dizzy, nauseous, or unwell at any point during the process." },
-      { title: "Keep your arm still", desc: "Avoid moving or tensing your arm during donation. Staying still ensures a smooth and faster process." },
-      { title: "Squeeze the stress ball", desc: "Gently squeezing a stress ball during donation helps maintain blood flow and speeds up the process." },
-    ];
-    const afterTips = [
-      { title: "Rest for 10–15 minutes", desc: "Sit or lie down at the donation site for at least 10 minutes before leaving to avoid dizziness." },
-      { title: "Drink fluids", desc: "Drink extra water, juice, or electrolyte drinks for the next 24 hours to replace lost fluids." },
-      { title: "Eat a snack", desc: "Have a small snack like biscuits or fruit juice immediately after donation to restore blood sugar." },
-      { title: "Avoid heavy lifting", desc: "Do not lift heavy objects with the donation arm for 5 hours after giving blood." },
-      { title: "Skip intense exercise", desc: "Avoid vigorous exercise or strenuous physical activity for the rest of the day." },
-      { title: "Keep the bandage on", desc: "Leave the bandage on for at least 4 hours. If the site bleeds, apply firm pressure and raise your arm." },
-    ];
+    const TIPS = {
+  "before": [
+    {
+      "title": {
+        "en": "Eat a healthy meal",
+        "bn": "স্বাস্থ্যকর খাবার খান"
+      },
+      "desc": {
+        "en": "Have a nutritious meal 2–3 hours before donating. Avoid fatty foods as they can affect blood tests.",
+        "bn": "রক্তদানের ২–৩ ঘণ্টা আগে পুষ্টিকর খাবার খান। তৈলাক্ত খাবার এড়িয়ে চলুন, কারণ এটি রক্ত পরীক্ষায় প্রভাব ফেলতে পারে।"
+      }
+    },
+    {
+      "title": {
+        "en": "Stay well hydrated",
+        "bn": "পর্যাপ্ত পানি পান করুন"
+      },
+      "desc": {
+        "en": "Drink an extra 500 ml of water before your appointment. Good hydration makes the process easier and safer.",
+        "bn": "রক্তদানের আগে অতিরিক্ত ৫০০ মিলি পানি পান করুন। পর্যাপ্ত পানি প্রক্রিয়াটিকে সহজ ও নিরাপদ করে।"
+      }
+    },
+    {
+      "title": {
+        "en": "Sleep well",
+        "bn": "ভালো করে ঘুমান"
+      },
+      "desc": {
+        "en": "Get at least 7–8 hours of sleep the night before. Fatigue can cause dizziness during or after donation.",
+        "bn": "আগের রাতে অন্তত ৭–৮ ঘণ্টা ঘুমান। ক্লান্তির কারণে রক্তদানের সময় বা পরে মাথা ঘুরতে পারে।"
+      }
+    },
+    {
+      "title": {
+        "en": "Avoid alcohol",
+        "bn": "অ্যালকোহল এড়িয়ে চলুন"
+      },
+      "desc": {
+        "en": "Abstain from alcohol for at least 24 hours before donating. Alcohol dehydrates you and affects blood quality.",
+        "bn": "রক্তদানের অন্তত ২৪ ঘণ্টা আগে অ্যালকোহল থেকে বিরত থাকুন। এটি শরীরে পানিশূন্যতা তৈরি করে এবং রক্তের মান প্রভাবিত করে।"
+      }
+    },
+    {
+      "title": {
+        "en": "Wear comfortable clothing",
+        "bn": "আরামদায়ক পোশাক পরুন"
+      },
+      "desc": {
+        "en": "Wear a short-sleeve shirt or clothing with sleeves that roll up easily for quick access to your arm.",
+        "bn": "ছোট হাতার শার্ট বা সহজে গুটিয়ে নেওয়া যায় এমন হাতার পোশাক পরুন, যাতে সহজে হাতে সুই দেওয়া যায়।"
+      }
+    },
+    {
+      "title": {
+        "en": "Bring valid ID",
+        "bn": "পরিচয়পত্র সাথে আনুন"
+      },
+      "desc": {
+        "en": "Carry a valid national ID card or donor registration card if you have one.",
+        "bn": "জাতীয় পরিচয়পত্র বা ডোনার কার্ড থাকলে সাথে রাখুন।"
+      }
+    }
+  ],
+  "during": [
+    {
+      "title": {
+        "en": "Stay calm and relaxed",
+        "bn": "শান্ত ও স্বাভাবিক থাকুন"
+      },
+      "desc": {
+        "en": "Anxiety can raise blood pressure. Take slow, deep breaths and focus on something positive.",
+        "bn": "দুশ্চিন্তা রক্তচাপ বাড়াতে পারে। ধীরে গভীর শ্বাস নিন এবং ইতিবাচক কিছুতে মন দিন।"
+      }
+    },
+    {
+      "title": {
+        "en": "Inform staff of concerns",
+        "bn": "সমস্যা হলে জানান"
+      },
+      "desc": {
+        "en": "Tell the medical staff if you feel dizzy, nauseous, or unwell at any point during the process.",
+        "bn": "প্রক্রিয়ার যেকোনো সময় মাথা ঘুরলে, বমি বমি লাগলে বা অসুস্থ বোধ করলে মেডিকেল স্টাফকে জানান।"
+      }
+    },
+    {
+      "title": {
+        "en": "Keep your arm still",
+        "bn": "হাত স্থির রাখুন"
+      },
+      "desc": {
+        "en": "Avoid moving or tensing your arm during donation. Staying still ensures a smooth and faster process.",
+        "bn": "রক্তদানের সময় হাত নাড়াবেন না বা শক্ত করবেন না। স্থির থাকলে প্রক্রিয়া মসৃণ ও দ্রুত হয়।"
+      }
+    },
+    {
+      "title": {
+        "en": "Squeeze the stress ball",
+        "bn": "স্ট্রেস বল চাপুন"
+      },
+      "desc": {
+        "en": "Gently squeezing a stress ball during donation helps maintain blood flow and speeds up the process.",
+        "bn": "রক্তদানের সময় আলতো করে স্ট্রেস বল চাপলে রক্তপ্রবাহ ঠিক থাকে এবং প্রক্রিয়া দ্রুত হয়।"
+      }
+    }
+  ],
+  "after": [
+    {
+      "title": {
+        "en": "Rest for 10–15 minutes",
+        "bn": "১০–১৫ মিনিট বিশ্রাম নিন"
+      },
+      "desc": {
+        "en": "Sit or lie down at the donation site for at least 10 minutes before leaving to avoid dizziness.",
+        "bn": "মাথা ঘোরা এড়াতে যাওয়ার আগে রক্তদান কেন্দ্রে অন্তত ১০ মিনিট বসে বা শুয়ে থাকুন।"
+      }
+    },
+    {
+      "title": {
+        "en": "Drink fluids",
+        "bn": "তরল পান করুন"
+      },
+      "desc": {
+        "en": "Drink extra water, juice, or electrolyte drinks for the next 24 hours to replace lost fluids.",
+        "bn": "পরবর্তী ২৪ ঘণ্টা বাড়তি পানি, জুস বা স্যালাইন জাতীয় পানীয় পান করুন।"
+      }
+    },
+    {
+      "title": {
+        "en": "Eat a snack",
+        "bn": "হালকা নাস্তা করুন"
+      },
+      "desc": {
+        "en": "Have a small snack like biscuits or fruit juice immediately after donation to restore blood sugar.",
+        "bn": "রক্তে শর্করা ঠিক রাখতে রক্তদানের পরপরই বিস্কুট বা ফলের জুসের মতো হালকা নাস্তা করুন।"
+      }
+    },
+    {
+      "title": {
+        "en": "Avoid heavy lifting",
+        "bn": "ভারী জিনিস তুলবেন না"
+      },
+      "desc": {
+        "en": "Do not lift heavy objects with the donation arm for 5 hours after giving blood.",
+        "bn": "রক্তদানের পর ৫ ঘণ্টা যে হাতে রক্ত দিয়েছেন সেটি দিয়ে ভারী জিনিস তুলবেন না।"
+      }
+    },
+    {
+      "title": {
+        "en": "Skip intense exercise",
+        "bn": "কঠোর ব্যায়াম এড়িয়ে চলুন"
+      },
+      "desc": {
+        "en": "Avoid vigorous exercise or strenuous physical activity for the rest of the day.",
+        "bn": "দিনের বাকি সময় কঠোর ব্যায়াম বা পরিশ্রমের কাজ এড়িয়ে চলুন।"
+      }
+    },
+    {
+      "title": {
+        "en": "Keep the bandage on",
+        "bn": "ব্যান্ডেজ রেখে দিন"
+      },
+      "desc": {
+        "en": "Leave the bandage on for at least 4 hours. If the site bleeds, apply firm pressure and raise your arm.",
+        "bn": "অন্তত ৪ ঘণ্টা ব্যান্ডেজ রাখুন। রক্ত বের হলে শক্ত করে চেপে ধরুন এবং হাত উঁচু করুন।"
+      }
+    }
+  ]
+};
 
     function renderTips(containerId, tips) {
+      const lang = window.i18n.getLang();
       document.getElementById(containerId).innerHTML = tips.map((t, i) => `
-        <div class="bg-[#0c101f]/70 border border-white/5 rounded-2xl p-5 hover:border-red-500/20 transition-all">
+        <div class="glass-card card-lift rounded-2xl p-5 reveal" style="--d:${i * 70}ms" translate="no">
           <div class="flex items-start gap-3">
-            <span class="flex-shrink-0 w-8 h-8 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-400 text-xs font-bold">${i + 1}</span>
+            <span class="flex-shrink-0 w-8 h-8 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-400 text-xs font-bold">${window.i18n.fmtNum(i + 1)}</span>
             <div>
-              <p class="text-sm font-bold text-white mb-1">${t.title}</p>
-              <p class="text-xs text-slate-400 leading-relaxed">${t.desc}</p>
+              <p class="text-sm font-bold text-white mb-1">${escapeHTML(t.title[lang])}</p>
+              <p class="text-xs text-slate-400 leading-relaxed">${escapeHTML(t.desc[lang])}</p>
             </div>
           </div>
-        </div>
-      `).join('');
+        </div>`).join("");
+      revealAll(document.getElementById(containerId));
     }
-    renderTips('beforeTips', beforeTips);
-    renderTips('duringTips', duringTips);
-    renderTips('afterTips', afterTips);
+    function renderAllTips() {
+      renderTips("beforeTips", TIPS.before);
+      renderTips("duringTips", TIPS.during);
+      renderTips("afterTips", TIPS.after);
+    }
+    renderAllTips();
+    window.addEventListener("langchange", renderAllTips);
   </script>
 </body>
 </html>

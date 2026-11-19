@@ -1,188 +1,130 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn" data-page="index">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Home - RoktoSeva | Blood Donation Platform Bangladesh</title>
-  <meta name="description" content="Find blood donors near you across Bangladesh. Browse emergency blood requests, register as a donor, and help save lives with RoktoSeva." />
+  <title>RoktoSeva — Blood Donation Platform Bangladesh</title>
+  <meta name="description" content="Find blood donors near you across all 64 districts of Bangladesh. Browse emergency blood requests, register as a donor and help save lives with RoktoSeva." />
+  <meta name="keywords" content="blood donation, blood donor, Bangladesh, find blood, emergency blood, RoktoSeva, রক্তদান, রক্তদাতা" />
+  <link rel="canonical" href="https://roktosheba.agi.bd/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="RoktoSeva — Blood Donation Platform Bangladesh" />
+  <meta property="og:description" content="Find blood donors near you across Bangladesh. Post emergency requests and save lives." />
+  <meta property="og:url" content="https://roktosheba.agi.bd/" />
+  <meta property="og:image" content="https://roktosheba.agi.bd/assets/og-image.png" />
+  <meta name="twitter:card" content="summary_large_image" />
   <link rel="icon" href="assets/favicon.ico" />
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#dc2626" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <script src="js/site-config.js"></script>
+  <script src="js/i18n.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            dark: '#070a13',
-            darker: '#050505',
-          }
-        }
-      }
-    }
-  </script>
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body class="min-h-screen flex flex-col bg-[#070a13] text-white">
 
   <div id="navbar"></div>
 
-  <main class="flex-1">
+  <main id="main" class="flex-1">
     <!-- HERO -->
-    <section class="relative min-h-[90vh] flex items-center justify-center bg-[#050505] overflow-hidden">
-      <div class="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-40"
-           style="background-image: url('https://images.unsplash.com/photo-1615461066841-6116e61058f4?q=80&w=2000&auto=format&fit=crop')"></div>
-      <div class="absolute inset-0 z-0 bg-[radial-gradient(circle_at_center,transparent_0%,#050505_100%)]"></div>
-      <div class="absolute inset-0 z-0 bg-gradient-to-t from-[#050505] via-transparent to-transparent"></div>
+    <section class="relative min-h-[92vh] flex items-center justify-center hero-bg overflow-hidden">
+      <div class="blob b1"></div><div class="blob b2"></div><div class="grid-overlay"></div>
+      <div id="drops" class="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true"></div>
+      <div class="absolute inset-0 bg-gradient-to-t from-[#070a13] via-transparent to-transparent pointer-events-none"></div>
 
       <div class="max-w-6xl mx-auto px-6 relative z-10 text-center">
         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 mb-6 mt-10 animate-fade-in">
-          <span class="relative flex h-2 w-2">
-            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-            <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-          </span>
+          <span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span></span>
           <span class="text-xs font-semibold text-red-400 uppercase tracking-widest">Live Blood Network</span>
         </div>
 
-        <h1 class="text-5xl md:text-8xl font-extrabold text-white tracking-tighter mb-8 leading-[0.9] animate-fade-in animate-fade-in-delay-1">
-          রক্তদান করুন<br />
-          <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-rose-600">
-            জীবনকে অনুপ্রাণিত করুন !
-          </span>
+        <h1 class="text-5xl md:text-8xl font-extrabold text-white tracking-tighter mb-8 leading-[0.95] animate-fade-in animate-fade-in-delay-1">
+          <span>Donate Blood</span><br />
+          <span class="text-shine">Inspire Lives!</span>
         </h1>
 
-        <p class="max-w-xl mx-auto text-lg md:text-xl text-slate-400 font-light mb-10 leading-relaxed animate-fade-in animate-fade-in-delay-2">
-          'রক্তসেবা' সহানুভূতিশীল রক্তদাতাদের জরুরি প্রয়োজনে থাকা রোগীদের সাথে সংযুক্ত করে। নিরবচ্ছিন্ন ও তাৎক্ষণিক চিকিৎসা সহায়তা প্রদানে নিবেদিত এমন একটি কমিউনিটিতে আপনিও যোগ দিন।
-        </p>
+        <p class="max-w-xl mx-auto text-lg md:text-xl text-slate-400 font-light mb-10 leading-relaxed animate-fade-in animate-fade-in-delay-2">RoktoSeva connects compassionate blood donors with patients in urgent need. Join a community dedicated to providing uninterrupted, immediate medical support.</p>
 
         <div class="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in animate-fade-in-delay-3">
-          <a href="register.html" class="px-8 py-4 bg-white text-black font-bold rounded-lg hover:bg-slate-200 transition-all active:scale-95">
-            Become a Donor
-          </a>
-          <a href="search.html" class="px-8 py-4 bg-white/5 text-white border border-white/10 font-medium rounded-lg hover:bg-white/10 transition-all backdrop-blur-sm">
-            Find Donors
-          </a>
-          <a href="dashboard/create-request.html" class="px-8 py-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition-all active:scale-95">
-            Request Blood
-          </a>
+          <a href="register.html" class="btn-shine px-8 py-4 bg-white text-black font-bold rounded-xl hover:bg-slate-200 transition-all active:scale-95 hover:-translate-y-0.5">Become a Donor</a>
+          <a href="search.html" class="px-8 py-4 bg-white/5 text-white border border-white/10 font-medium rounded-xl hover:bg-white/10 transition-all backdrop-blur-sm hover:-translate-y-0.5">Find Donors</a>
+          <a href="dashboard/create-request.html" class="btn-shine px-8 py-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-all active:scale-95 hover:-translate-y-0.5 shadow-[0_8px_30px_rgba(220,38,38,0.4)]">Request Blood</a>
         </div>
 
         <div class="mt-20 pt-10 border-t border-white/10 grid grid-cols-3 gap-8 max-w-2xl mx-auto animate-fade-in animate-fade-in-delay-4">
-          <div>
-            <div class="text-3xl md:text-4xl font-bold text-white" id="statDonors">—</div>
-            <div class="text-[10px] uppercase tracking-widest text-slate-500 mt-1">Active Donors</div>
-          </div>
-          <div>
-            <div class="text-3xl md:text-4xl font-bold text-white" id="statRequests">—</div>
-            <div class="text-[10px] uppercase tracking-widest text-slate-500 mt-1">Pending Requests</div>
-          </div>
-          <div>
-            <div class="text-3xl md:text-4xl font-bold text-white" id="statDistricts">64</div>
-            <div class="text-[10px] uppercase tracking-widest text-slate-500 mt-1">Districts Covered</div>
-          </div>
+          <div><div class="text-3xl md:text-5xl font-extrabold text-white" id="statDonors" data-n="0">0</div><div class="text-[10px] uppercase tracking-widest text-slate-500 mt-1">Active Donors</div></div>
+          <div><div class="text-3xl md:text-5xl font-extrabold text-white" id="statRequests" data-n="0">0</div><div class="text-[10px] uppercase tracking-widest text-slate-500 mt-1">Pending Requests</div></div>
+          <div><div class="text-3xl md:text-5xl font-extrabold text-white" id="statDistricts" data-n="64">64</div><div class="text-[10px] uppercase tracking-widest text-slate-500 mt-1">Districts Covered</div></div>
         </div>
+        <div class="flex justify-center mt-12 animate-fade-in animate-fade-in-delay-4"><span class="scroll-hint" aria-hidden="true"></span></div>
       </div>
     </section>
 
     <!-- PENDING REQUESTS -->
-    <section class="relative bg-[#070a13] text-white py-20 px-4 sm:px-8 overflow-hidden">
-      <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[1px] bg-gradient-to-r from-transparent via-red-500/20 to-transparent"></div>
+    <section id="requests" class="relative bg-[#070a13] text-white py-20 px-4 sm:px-8 overflow-hidden">
       <div class="absolute top-1/2 right-0 w-[400px] h-[400px] bg-red-600/5 rounded-full blur-[100px] pointer-events-none"></div>
-
       <div class="max-w-7xl mx-auto relative z-10">
-        <div class="text-center mb-12">
-          <h2 class="text-3xl md:text-4xl font-black uppercase tracking-tight mb-3">
-            Emergency <span class="text-red-500">Blood Requests</span>
-          </h2>
+        <div class="text-center mb-12 reveal">
+          <h2 class="text-3xl md:text-4xl font-black uppercase tracking-tight mb-3">Emergency <span class="text-red-500">Blood Requests</span></h2>
           <p class="text-slate-400 text-sm max-w-md mx-auto">Live pending requests from patients across Bangladesh. Filter by blood group or district.</p>
         </div>
-
-        <div class="flex flex-wrap gap-3 justify-center mb-10">
-          <select id="filterBlood" class="form-input w-auto min-w-[140px] text-sm py-2">
+        <div class="flex flex-wrap gap-3 justify-center mb-10 reveal">
+          <select id="filterBlood" class="form-input w-auto min-w-[150px] text-sm py-2" aria-label="Blood Group">
             <option value="All">All Blood Groups</option>
-            <option value="A+">A+</option>
-            <option value="A-">A-</option>
-            <option value="B+">B+</option>
-            <option value="B-">B-</option>
-            <option value="AB+">AB+</option>
-            <option value="AB-">AB-</option>
-            <option value="O+">O+</option>
-            <option value="O-">O-</option>
+            <option value="A+">A+</option><option value="A-">A-</option><option value="B+">B+</option><option value="B-">B-</option>
+            <option value="AB+">AB+</option><option value="AB-">AB-</option><option value="O+">O+</option><option value="O-">O-</option>
           </select>
-          <select id="filterDistrict" class="form-input w-auto min-w-[160px] text-sm py-2">
-            <option value="All">All Districts</option>
-          </select>
+          <select id="filterDistrict" class="form-input w-auto min-w-[170px] text-sm py-2" aria-label="District"><option value="All">All Districts</option></select>
         </div>
-
-        <div id="requestsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <!-- loaded by JS -->
-        </div>
-
-        <div class="text-center mt-12">
-          <a href="search.html" class="inline-block px-8 py-3 bg-white/5 border border-white/10 text-white rounded-xl hover:bg-red-600 hover:border-red-500 transition-all font-bold uppercase text-xs tracking-wider">
-            Search Donors
-          </a>
+        <div id="requestsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        <div class="text-center mt-12 reveal">
+          <a href="search.html" class="inline-block px-8 py-3 bg-white/5 border border-white/10 text-white rounded-xl hover:bg-red-600 hover:border-red-500 transition-all font-bold uppercase text-xs tracking-wider">Search Donors</a>
         </div>
       </div>
     </section>
 
     <!-- AVAILABLE DONORS -->
-    <section class="relative bg-[#070a13] text-white py-20 px-4 sm:px-8 overflow-hidden border-t border-white/5">
+    <section id="donors" class="relative bg-[#070a13] text-white py-20 px-4 sm:px-8 overflow-hidden border-t border-white/5">
       <div class="max-w-7xl mx-auto relative z-10">
-        <div class="text-center mb-12">
-          <h2 class="text-3xl md:text-4xl font-black uppercase tracking-tight mb-3">
-            Available <span class="text-red-500">Donors</span>
-          </h2>
+        <div class="text-center mb-12 reveal">
+          <h2 class="text-3xl md:text-4xl font-black uppercase tracking-tight mb-3">Available <span class="text-red-500">Donors</span></h2>
           <p class="text-slate-400 text-sm max-w-md mx-auto">Recent registered donors ready to help across Bangladesh.</p>
         </div>
-        <div id="donorsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          <!-- loaded by JS -->
-        </div>
-        <div class="text-center mt-12">
-          <a href="search.html" class="inline-block px-8 py-3 bg-red-600/10 border border-red-500/30 text-red-400 rounded-xl hover:bg-red-600 hover:text-white transition-all font-bold uppercase text-xs tracking-wider">
-            View All Donors
-          </a>
+        <div id="donorsGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5"></div>
+        <div class="text-center mt-12 reveal">
+          <a href="search.html" class="inline-block px-8 py-3 bg-red-600/10 border border-red-500/30 text-red-400 rounded-xl hover:bg-red-600 hover:text-white transition-all font-bold uppercase text-xs tracking-wider">View All Donors</a>
         </div>
       </div>
     </section>
 
-    <!-- GUIDELINES PREVIEW -->
+    <!-- LINKS: GUIDELINES / FAQ -->
     <section class="relative bg-[#070a13] py-16 px-4 sm:px-8 border-t border-white/5">
-      <div class="max-w-7xl mx-auto text-center">
-        <h2 class="text-2xl md:text-3xl font-black uppercase tracking-tight mb-4">
-          Donation <span class="text-red-500">Guidelines</span>
-        </h2>
-        <p class="text-slate-400 text-sm max-w-lg mx-auto mb-8">Know the eligibility criteria before you donate blood. Stay safe, save lives.</p>
-        <a href="guidelines.html" class="inline-block px-6 py-3 bg-red-600/10 border border-red-500/30 text-red-400 rounded-xl hover:bg-red-600 hover:text-white transition-all font-bold text-sm uppercase tracking-wider">
-          Read Full Guidelines
-        </a>
+      <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="glass-card card-lift rounded-3xl p-8 text-center reveal">
+          <h2 class="text-2xl font-black uppercase tracking-tight mb-3">Donation <span class="text-red-500">Guidelines</span></h2>
+          <p class="text-slate-400 text-sm mb-6">Know the eligibility criteria before you donate blood. Stay safe, save lives.</p>
+          <a href="guidelines.html" class="inline-block px-6 py-3 bg-red-600/10 border border-red-500/30 text-red-400 rounded-xl hover:bg-red-600 hover:text-white transition-all font-bold text-sm uppercase tracking-wider">Read Full Guidelines</a>
+        </div>
+        <div class="glass-card card-lift rounded-3xl p-8 text-center reveal" style="--d:120ms">
+          <h2 class="text-2xl font-black uppercase tracking-tight mb-3">Frequently Asked <span class="text-red-500">Questions</span></h2>
+          <p class="text-slate-400 text-sm mb-6">Have questions about blood donation? Find answers here.</p>
+          <a href="faq.html" class="inline-block px-6 py-3 bg-red-600/10 border border-red-500/30 text-red-400 rounded-xl hover:bg-red-600 hover:text-white transition-all font-bold text-sm uppercase tracking-wider">View All FAQs</a>
+        </div>
       </div>
     </section>
 
-    <!-- FAQ PREVIEW -->
-    <section class="relative bg-[#070a13] py-16 px-4 sm:px-8 border-t border-white/5">
-      <div class="max-w-7xl mx-auto text-center">
-        <h2 class="text-2xl md:text-3xl font-black uppercase tracking-tight mb-4">
-          Frequently Asked <span class="text-red-500">Questions</span>
-        </h2>
-        <p class="text-slate-400 text-sm max-w-lg mx-auto mb-8">Have questions about blood donation? Find answers here.</p>
-        <a href="faq.html" class="inline-block px-6 py-3 bg-red-600/10 border border-red-500/30 text-red-400 rounded-xl hover:bg-red-600 hover:text-white transition-all font-bold text-sm uppercase tracking-wider">
-          View All FAQs
-        </a>
-      </div>
-    </section>
-
-    <!-- CONTACT PREVIEW -->
-    <section class="relative bg-[#070a13] py-16 px-4 sm:px-8 border-t border-white/5">
-      <div class="max-w-7xl mx-auto text-center">
-        <h2 class="text-2xl md:text-3xl font-black uppercase tracking-tight mb-4">
-          Get In <span class="text-red-500">Touch</span>
-        </h2>
-        <p class="text-slate-400 text-sm max-w-lg mx-auto mb-8">Need help or have a suggestion? We are here 24/7.</p>
-        <a href="contact.html" class="inline-block px-6 py-3 bg-red-600/10 border border-red-500/30 text-red-400 rounded-xl hover:bg-red-600 hover:text-white transition-all font-bold text-sm uppercase tracking-wider">
-          Contact Us
-        </a>
+    <!-- CTA -->
+    <section class="relative py-20 px-4 sm:px-8 border-t border-white/5 overflow-hidden">
+      <div class="absolute inset-0 bg-gradient-to-r from-red-700/20 via-rose-600/10 to-red-700/20"></div>
+      <div class="max-w-3xl mx-auto text-center relative z-10 reveal">
+        <div class="text-5xl mb-4 float-soft">🩸</div>
+        <h2 class="text-3xl md:text-4xl font-black mb-3">Be someone's reason to live.</h2>
+        <p class="text-slate-300 mb-8">Join thousands of donors across Bangladesh today.</p>
+        <a href="register.html" class="btn-shine inline-block px-10 py-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-all active:scale-95 shadow-[0_8px_30px_rgba(220,38,38,0.4)]">Become a Donor</a>
       </div>
     </section>
   </main>
@@ -193,190 +135,176 @@
   <script src="js/firebase-config.js"></script>
   <script src="js/common.js"></script>
   <script>
-    // Populate all districts in filter
+    // Falling blood drops (decorative)
+    (function () {
+      const box = document.getElementById("drops");
+      for (let i = 0; i < 6; i++) {
+        const d = document.createElement("span");
+        d.className = "blood-drop";
+        d.style.left = Math.random() * 100 + "%";
+        d.style.setProperty("--dur", 9 + Math.random() * 10 + "s");
+        d.style.setProperty("--delay", -Math.random() * 14 + "s");
+        d.style.transform = "scale(" + (0.6 + Math.random() * 0.9) + ")";
+        box.appendChild(d);
+      }
+    })();
+
     const filterDistrict = document.getElementById("filterDistrict");
-    if (typeof districts !== "undefined") {
-      districts.sort((a, b) => a.name.localeCompare(b.name)).forEach((d) => {
-        const o = document.createElement("option");
-        o.value = d.name;
-        o.textContent = d.name;
-        filterDistrict.appendChild(o);
-      });
-    }
+    [...districts].sort((a, b) => a.name.localeCompare(b.name)).forEach((d) => {
+      const o = document.createElement("option");
+      o.value = d.name; o.textContent = d.name; o.setAttribute("translate", "no");
+      filterDistrict.appendChild(o);
+    });
 
     let allRequests = [];
+    let allDonors = [];
+    const isLoggedIn = !!getCurrentUser();
 
     function renderRequests(list) {
       const grid = document.getElementById("requestsGrid");
       if (!list.length) {
-        grid.innerHTML = emptyStateHTML(
-          "No pending blood requests right now.",
-          "dashboard/create-request.html",
-          "Post a request →"
-        );
+        grid.innerHTML = emptyStateHTML("No pending blood requests right now.", "dashboard/create-request.html", "Post a request →");
+        revealAll(grid);
         return;
       }
-      grid.innerHTML = list.map((req) => `
-        <div class="request-card group relative bg-[#0c101f]/70 border border-white/5 p-6 rounded-3xl transition-all duration-300 shadow-xl overflow-hidden">
-          <div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-red-500/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+      grid.innerHTML = list.map((r, i) => {
+        const urgent = (r.status || "").toLowerCase() === "urgent";
+        const loc = [r.upazila, r.district].filter(Boolean).join(", ") || "—";
+        const find = `search.html?group=${encodeURIComponent(r.bloodGroup || "")}&district=${encodeURIComponent(r.district || "")}`;
+        return `
+        <div class="request-card card-lift group relative glass-card p-6 rounded-3xl overflow-hidden reveal" style="--d:${(i % 6) * 70}ms">
+          <div class="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-red-500/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
           <div class="flex justify-between items-start mb-4">
-            <div class="w-12 h-12 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500 font-black text-xl">
-              ${req.bloodGroup || "—"}
-            </div>
-            <span class="text-[10px] uppercase font-bold ${(req.status || "").toLowerCase() === "urgent" ? "text-red-400 bg-red-500/10 border-red-500/20" : "text-yellow-500 bg-yellow-500/10 border-yellow-500/20"} px-2.5 py-1 rounded-lg border">
-              ${req.status || "Pending"}
-            </span>
+            <div class="w-12 h-12 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500 font-black text-lg ${urgent ? "heartbeat-badge" : ""}" translate="no">${escapeHTML(r.bloodGroup || "—")}</div>
+            <span class="text-[10px] uppercase font-bold ${urgent ? "text-red-400 bg-red-500/10 border-red-500/20" : "text-yellow-500 bg-yellow-500/10 border-yellow-500/20"} px-2.5 py-1 rounded-lg border">${urgent ? "Urgent" : "Pending"}</span>
           </div>
-          <h3 class="text-lg font-bold text-white mb-3 group-hover:text-red-400 transition-colors">${req.patientName || "Patient"}</h3>
-          <div class="space-y-1.5 text-sm text-slate-400">
-            <p class="text-xs">🏥 Hospital: <span class="text-slate-300 font-medium">${req.hospital || "—"}</span></p>
-            <p class="text-xs">📍 Location: <span class="text-slate-300 font-medium">${req.upazila || ""}${req.upazila && req.district ? ", " : ""}${req.district || "—"}</span></p>
-            <p class="text-xs">📅 Date Needed: <span class="text-slate-300 font-medium">${req.dateNeeded || "—"}</span></p>
-            ${req.unitsNeeded ? `<p class="text-xs">🩸 Units: <span class="text-slate-300 font-medium">${req.unitsNeeded}</span></p>` : ""}
-            ${req.patientAge ? `<p class="text-xs">👤 Age: <span class="text-slate-300 font-medium">${req.patientAge}</span></p>` : ""}
+          <h3 class="text-lg font-bold text-white mb-3 group-hover:text-red-400 transition-colors">${u(r.patientName || "Patient")}</h3>
+          <div class="space-y-1.5 text-xs text-slate-400">
+            <p>🏥 <span>Hospital</span>: <span class="text-slate-300 font-medium">${u(r.hospital || "—")}</span></p>
+            <p>📍 <span>Location</span>: <span class="text-slate-300 font-medium">${u(loc)}</span></p>
+            <p>📅 <span>Date Needed</span>: <span class="text-slate-300 font-medium">${u(window.i18n.fmtDate(r.dateNeeded) || r.dateNeeded || "—")}</span></p>
+            ${r.unitsNeeded ? `<p>🩸 <span>Units</span>: <span class="text-slate-300 font-medium">${window.i18n.fmtNum(Number(r.unitsNeeded) || 1)}</span></p>` : ""}
+            ${r.patientAge ? `<p>👤 <span>Age</span>: <span class="text-slate-300 font-medium">${window.i18n.fmtNum(Number(r.patientAge) || 0)}</span></p>` : ""}
           </div>
-          <div class="mt-6">
-            <a href="search.html" class="block text-center w-full py-2.5 bg-white/5 border border-white/10 text-white rounded-xl hover:bg-red-600 hover:border-red-500 transition-all font-bold uppercase text-xs tracking-wider">
-              Find Matching Donors
-            </a>
+          <div class="mt-6 grid gap-2" data-contact="${escapeHTML(r.id)}">
+            ${isLoggedIn
+              ? `<button type="button" onclick="showRequesterContact('${escapeHTML(r.id)}', this)" class="btn-shine w-full py-2.5 bg-gradient-to-r from-red-600 to-rose-600 text-white rounded-xl font-bold uppercase text-xs tracking-wider hover:shadow-[0_0_20px_rgba(239,68,68,0.4)] transition-all">Contact Requester</button>`
+              : `<a href="${loginUrl()}" class="block text-center w-full py-2.5 bg-gradient-to-r from-red-600 to-rose-600 text-white rounded-xl font-bold uppercase text-xs tracking-wider">Login to contact</a>`}
+            <a href="${find}" class="block text-center w-full py-2.5 bg-white/5 border border-white/10 text-white rounded-xl hover:bg-white/10 transition-all font-bold uppercase text-xs tracking-wider">Find Matching Donors</a>
           </div>
-        </div>
-      `).join("");
+        </div>`;
+      }).join("");
+      revealAll(grid);
+    }
+
+    async function showRequesterContact(id, btn) {
+      btn.disabled = true;
+      try {
+        const fb = await initFirebase();
+        const { doc, getDoc } = await getFirestoreFns();
+        const snap = await getDoc(doc(fb.db, "requestContacts", id));
+        if (!snap.exists() || !snap.data().phone) throw new Error("none");
+        const d = snap.data();
+        const phone = String(d.phone).replace(/[^\d+]/g, "");
+        btn.outerHTML = `<a href="tel:${escapeHTML(phone)}" class="block text-center w-full py-2.5 bg-green-600 text-white rounded-xl font-bold text-xs tracking-wider">📞 <span>Call now</span> · <span translate="no">${escapeHTML(phone)}</span></a>`
+          + (d.emergencyContact ? `<p class="text-[11px] text-slate-400 text-center"><span>Emergency contact</span>: ${u(d.emergencyContact)}</p>` : "");
+      } catch {
+        btn.disabled = false;
+        showToast("Contact not available.", "error");
+      }
     }
 
     function filterRequests() {
       const blood = document.getElementById("filterBlood").value;
       const district = document.getElementById("filterDistrict").value;
-      const filtered = allRequests.filter((r) => {
-        const matchBlood = blood === "All" || r.bloodGroup === blood;
-        const matchDistrict = district === "All" || r.district === district;
-        return matchBlood && matchDistrict;
-      });
-      renderRequests(filtered);
+      renderRequests(allRequests.filter((r) => (blood === "All" || r.bloodGroup === blood) && (district === "All" || r.district === district)));
     }
-
     document.getElementById("filterBlood").addEventListener("change", filterRequests);
     document.getElementById("filterDistrict").addEventListener("change", filterRequests);
 
-    // Load from Firebase
-    async function loadHomeData() {
-      const grid = document.getElementById("requestsGrid");
-      grid.innerHTML = loadingHTML();
-
-      const fb = await initFirebase();
-      if (!fb) {
-        document.getElementById("statDonors").textContent = "0";
-        document.getElementById("statRequests").textContent = "0";
-        grid.innerHTML = emptyStateHTML(
-          "Connect Firebase to see live requests. No demo data is shown.",
-          "register.html",
-          "Become a donor →"
-        );
+    function renderHomeDonors(list) {
+      const grid = document.getElementById("donorsGrid");
+      if (!list.length) {
+        grid.className = "grid grid-cols-1 gap-5";
+        grid.innerHTML = emptyStateHTML("No donors yet. Be the first!", "register.html", "Become a donor →");
+        revealAll(grid);
         return;
       }
+      grid.className = "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5";
+      grid.innerHTML = list.map((d, i) => {
+        const initial = (d.name || "D").charAt(0).toUpperCase();
+        const avail = d.available !== false && isDonorAvailable(d.lastDonationDate);
+        return `
+        <a href="donor.html?id=${encodeURIComponent(d.id)}" class="card-lift glass-card rounded-2xl p-5 text-center block reveal" style="--d:${(i % 8) * 60}ms">
+          <div class="relative w-16 h-16 mx-auto mb-3">
+            <img src="${escapeHTML(safeImg(d.image, initial))}" alt="" loading="lazy" class="w-16 h-16 rounded-full object-cover border-2 border-red-500/30 bg-slate-800"
+                 onerror="this.onerror=null;this.src='https://placehold.co/100x100/1e293b/ef4444?text=${encodeURIComponent(initial)}'" />
+            <span class="absolute -bottom-1 -right-1 min-w-[28px] px-1.5 py-0.5 rounded-full bg-red-600 text-white text-[10px] font-black border-2 border-[#0c101f]" translate="no">${escapeHTML(d.bloodGroup || "—")}</span>
+          </div>
+          <h3 class="font-bold text-white text-sm truncate">${u(d.name || "Donor")}</h3>
+          <p class="text-[11px] text-slate-500 mt-1 truncate">${u(d.district || "")}</p>
+          <span class="inline-block mt-2 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border ${avail ? "text-green-400 bg-green-500/10 border-green-500/20" : "text-yellow-400 bg-yellow-500/10 border-yellow-500/20"}">${avail ? "Available" : "Unavailable"}</span>
+        </a>`;
+      }).join("");
+      revealAll(grid);
+    }
 
+    async function loadHomeData() {
+      const grid = document.getElementById("requestsGrid");
+      grid.innerHTML = loadingHTML(3);
+      document.getElementById("donorsGrid").innerHTML = loadingHTML(4).replace(/skeleton-card/g, "skeleton-card");
+      const fb = await initFirebase();
+      if (!fb) { renderRequests([]); renderHomeDonors([]); return; }
+      const fs = await getFirestoreFns();
+      const { collection, getDocs, query, where, limit, getCountFromServer } = fs;
+
+      // ---- Requests ----
       try {
-        const { collection, getDocs, query, where, orderBy, limit } = await getFirestoreFns();
-
-        // Pending requests
-        let reqSnap;
+        let snap;
         try {
-          reqSnap = await getDocs(
-            query(collection(fb.db, "requests"), where("status", "in", ["Pending", "Urgent"]), orderBy("createdAt", "desc"), limit(12))
-          );
-        } catch {
-          // Fallback if composite index missing
-          reqSnap = await getDocs(collection(fb.db, "requests"));
-        }
-
+          snap = await getDocs(query(collection(fb.db, "requests"), where("status", "in", ["Pending", "Urgent"]), limit(60)));
+        } catch (e) { snap = await getDocs(query(collection(fb.db, "requests"), limit(60))); }
+        const cutoff = Date.now() - 2 * 86400000; // hide requests whose date passed 2+ days ago
         allRequests = [];
-        reqSnap.forEach((docSnap) => {
-          const d = docSnap.data();
-          if (d.status === "Pending" || d.status === "Urgent" || !d.status) {
-            allRequests.push({ id: docSnap.id, ...d });
-          }
+        snap.forEach((s) => {
+          const d = s.data();
+          if (!(d.status === "Pending" || d.status === "Urgent")) return;
+          if (d.dateNeeded && new Date(d.dateNeeded).getTime() < cutoff) return;
+          allRequests.push({ id: s.id, ...d });
         });
-        // Sort client-side if needed
-        allRequests.sort((a, b) => {
-          const da = a.createdAt?.seconds || 0;
-          const db = b.createdAt?.seconds || 0;
-          return db - da;
-        });
-        allRequests = allRequests.slice(0, 12);
-
-        document.getElementById("statRequests").textContent = String(allRequests.length);
+        allRequests.sort((a, b) => (b.status === "Urgent") - (a.status === "Urgent") || (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+        allRequests = allRequests.slice(0, 18);
+        animateCount(document.getElementById("statRequests"), allRequests.length);
         renderRequests(allRequests);
-
-        // Donor count + recent donors
-        try {
-          const usersSnap = await getDocs(collection(fb.db, "users"));
-          document.getElementById("statDonors").textContent = String(usersSnap.size);
-
-          const donors = [];
-          usersSnap.forEach((docSnap) => {
-            const d = docSnap.data();
-            if (d.role && d.role !== "donor" && d.role !== "user") return;
-            donors.push({ id: docSnap.id, ...d });
-          });
-          // Prefer available, then recent
-          donors.sort((a, b) => {
-            const aAvail = a.available !== false && isDonorAvailable(a.lastDonationDate) ? 1 : 0;
-            const bAvail = b.available !== false && isDonorAvailable(b.lastDonationDate) ? 1 : 0;
-            if (bAvail !== aAvail) return bAvail - aAvail;
-            const ta = a.createdAt?.seconds || 0;
-            const tb = b.createdAt?.seconds || 0;
-            return tb - ta;
-          });
-          renderHomeDonors(donors.slice(0, 8));
-        } catch {
-          document.getElementById("statDonors").textContent = "0";
-          renderHomeDonors([]);
-        }
       } catch (err) {
         console.error(err);
-        document.getElementById("statDonors").textContent = "0";
-        document.getElementById("statRequests").textContent = "0";
-        grid.innerHTML = emptyStateHTML(
-          "Could not load requests. Check Firebase connection.",
-          "dashboard/create-request.html",
-          "Create a request →"
-        );
+        grid.innerHTML = emptyStateHTML("Could not load requests. Check your connection.", null, null);
+      }
+
+      // ---- Donors ----
+      try {
+        const snap = await getDocs(query(collection(fb.db, "publicDonors"), limit(60)));
+        allDonors = [];
+        snap.forEach((s) => allDonors.push({ id: s.id, ...s.data() }));
+        allDonors.sort((a, b) => {
+          const av = (x) => (x.available !== false && isDonorAvailable(x.lastDonationDate) ? 1 : 0);
+          return av(b) - av(a) || (b.updatedAt?.seconds || 0) - (a.updatedAt?.seconds || 0);
+        });
+        renderHomeDonors(allDonors.slice(0, 8));
+        try {
+          const c = await getCountFromServer(collection(fb.db, "publicDonors"));
+          animateCount(document.getElementById("statDonors"), c.data().count);
+        } catch { animateCount(document.getElementById("statDonors"), allDonors.length); }
+      } catch (err) {
+        console.error(err);
         renderHomeDonors([]);
       }
     }
 
-    function renderHomeDonors(list) {
-      const grid = document.getElementById("donorsGrid");
-      if (!grid) return;
-      if (!list.length) {
-        grid.innerHTML = emptyStateHTML("No donors yet. Be the first!", "register.html", "Become a donor →");
-        return;
-      }
-      grid.innerHTML = list.map((d) => {
-        const initial = (d.name || "D").charAt(0).toUpperCase();
-        const photo = d.image || `https://placehold.co/100x100/1e293b/ef4444?text=${initial}`;
-        const avail = d.available !== false && isDonorAvailable(d.lastDonationDate);
-        const isFemale = (d.gender || "").toLowerCase() === "female";
-        return `
-        <div class="bg-[#0c101f]/70 border border-white/5 rounded-2xl p-5 hover:border-red-500/30 transition-all text-center">
-          <img src="${photo}" alt="${d.name || "Donor"}"
-               class="w-16 h-16 rounded-full object-cover border-2 border-red-500/30 mx-auto mb-3 bg-slate-800"
-               onerror="this.src='https://placehold.co/100x100/1e293b/ef4444?text=${initial}'" />
-          <h3 class="font-bold text-white text-sm truncate">${d.name || "Donor"}</h3>
-          <p class="text-[10px] text-red-400 font-bold mt-1">${d.bloodGroup || "—"}</p>
-          <p class="text-[10px] text-slate-500 mt-0.5 truncate">${d.district || ""}</p>
-          <span class="inline-block mt-2 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border ${avail ? "text-green-400 bg-green-500/10 border-green-500/20" : "text-yellow-400 bg-yellow-500/10 border-yellow-500/20"}">${avail ? "Available" : "Unavailable"}</span>
-          ${isFemale ? '<p class="text-[9px] text-slate-500 mt-1">Contact via Admin</p>' : ""}
-        </div>`;
-      }).join("");
-    }
-
+    window.addEventListener("langchange", () => { filterRequests(); renderHomeDonors(allDonors.slice(0, 8)); });
     loadHomeData();
 
-    // Register PWA service worker
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("./sw.js").catch(() => {});
-    }
+    if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});
   </script>
 </body>
 </html>
