@@ -1,21 +1,32 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn" data-page="profile">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Profile - RoktoSeva</title>
+  <title>My Profile | RoktoSeva</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <meta property="og:title" content="My Profile | RoktoSeva" />
+  <meta property="og:image" content="https://roktosheba.agi.bd/assets/og-image.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png" />
+  <link rel="manifest" href="../manifest.json" />
+  <meta name="theme-color" content="#dc2626" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="icon" href="../assets/favicon.ico" />
+  <script src="../js/site-config.js"></script>
+  <script src="../js/i18n.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="../css/style.css" />
 </head>
 <body class="min-h-screen flex flex-col bg-[#070a13] text-white">
   <div id="navbar"></div>
 
-  <main class="flex-1 relative py-12 px-4 sm:px-8">
+  <main id="main" class="flex-1 relative py-12 px-4 sm:px-8">
     <div class="max-w-xl mx-auto">
       <h1 class="text-3xl font-extrabold tracking-tight mb-8">My <span class="text-red-500">Profile</span></h1>
 
-      <div class="bg-[#0c101f]/70 border border-white/5 rounded-2xl p-6 sm:p-8">
+      <div class="reveal card-lift bg-[#0c101f]/70 border border-white/5 rounded-2xl p-6 sm:p-8">
         <!-- Photo + basic -->
         <div class="flex flex-col sm:flex-row items-center gap-4 mb-8">
           <div class="relative shrink-0">
@@ -38,6 +49,10 @@
           <div class="flex justify-between border-b border-white/5 pb-3">
             <span class="text-slate-500">Blood Group</span>
             <span id="profileBlood" class="font-bold text-red-400">—</span>
+          </div>
+          <div class="flex justify-between border-b border-white/5 pb-3">
+            <span class="text-slate-500">Age</span>
+            <span id="profileAge" class="font-medium">—</span>
           </div>
           <div class="flex justify-between border-b border-white/5 pb-3">
             <span class="text-slate-500">Gender</span>
@@ -84,6 +99,10 @@
             <input type="tel" id="editPhone" class="form-input" required pattern="01[3-9][0-9]{8}" />
           </div>
           <div>
+            <label class="form-label" for="editAge">Age</label>
+            <input type="number" id="editAge" class="form-input" min="18" max="60" required inputmode="numeric" />
+          </div>
+          <div>
             <label class="form-label" for="editGender">Gender</label>
             <select id="editGender" class="form-input" required>
               <option value="Male">Male</option>
@@ -116,7 +135,7 @@
             <input type="number" id="editDonationCount" class="form-input" min="0" value="0" />
           </div>
           <div class="flex gap-3 pt-2">
-            <button type="submit" id="saveBtn" class="flex-1 py-3 bg-gradient-to-r from-red-600 to-rose-600 rounded-xl text-white font-bold text-sm uppercase tracking-wider disabled:opacity-50 flex items-center justify-center gap-2">
+            <button type="submit" id="saveBtn" class="flex-1 py-3 bg-gradient-to-r from-red-600 to-rose-600 btn-shine rounded-xl text-white font-bold text-sm uppercase tracking-wider disabled:opacity-50 flex items-center justify-center gap-2">
               <span id="saveBtnText">Save Changes</span>
               <span id="saveSpinner" class="spinner hidden"></span>
             </button>
@@ -150,17 +169,18 @@
       document.getElementById("profileEmail").textContent = u.email || "—";
       document.getElementById("profileBlood").textContent = u.bloodGroup || "—";
       document.getElementById("profileGender").textContent = u.gender || "—";
+      document.getElementById("profileAge").textContent = u.age ? window.i18n.fmtNum(u.age) : "—";
       document.getElementById("profilePhone").textContent = u.phone || "—";
       document.getElementById("profileDistrict").textContent = u.district || "—";
       document.getElementById("profileUpazila").textContent = u.upazila || "—";
       document.getElementById("profileHasDonated").textContent = u.hasDonated ? "Yes" : "No";
       document.getElementById("profileLastDonation").textContent = formatDonationDate(u.lastDonationDate);
-      document.getElementById("profileDonationCount").textContent = String(u.donationCount ?? 0);
+      document.getElementById("profileDonationCount").textContent = window.i18n.fmtNum(u.donationCount ?? 0);
       document.getElementById("profileRole").textContent = u.role || "donor";
 
       const initial = (u.name || "U").charAt(0).toUpperCase();
       document.getElementById("profileImg").src =
-        u.image || `https://placehold.co/100x100/1e293b/ef4444?text=${initial}`;
+        safeImg(u.image, initial);
 
       const avail = u.available !== false && isDonorAvailable(u.lastDonationDate);
       const badge = document.getElementById("profileAvailableBadge");
@@ -177,6 +197,7 @@
       document.getElementById("editName").value = u.name || "";
       document.getElementById("editPhone").value = u.phone || "";
       document.getElementById("editGender").value = u.gender || "Male";
+      document.getElementById("editAge").value = u.age || "";
       document.getElementById("editBlood").value = u.bloodGroup || "A+";
       document.getElementById("editHasDonated").value = u.hasDonated ? "yes" : "no";
       document.getElementById("editLastDonation").value = u.lastDonationDate || "";
@@ -229,6 +250,7 @@
       }
     })();
 
+    window.addEventListener("langchange", () => currentUser && fillView(currentUser));
     document.getElementById("editProfileBtn").addEventListener("click", showEdit);
     document.getElementById("cancelEditBtn").addEventListener("click", showView);
     document.getElementById("editHasDonated").addEventListener("change", toggleLastDonationField);
@@ -263,11 +285,12 @@
         await updateDoc(doc(fb.db, "users", currentUser.uid), { image: imageUrl });
         currentUser.image = imageUrl;
         setCurrentUser(currentUser);
+        syncPublicProfile(currentUser);
         document.getElementById("profileImg").src = imageUrl;
         showToast("Profile photo updated!", "success");
       } catch (err) {
         console.error(err);
-        showToast(err.message || "Photo upload failed.", "error");
+        showToast(err.message || "Image upload failed.", "error");
       }
       selectedPhotoFile = null;
       e.target.value = "";
@@ -283,12 +306,17 @@
       const name = document.getElementById("editName").value.trim();
       const phone = document.getElementById("editPhone").value.trim().replace(/\s|-/g, "");
       const gender = document.getElementById("editGender").value;
+      const age = parseInt(document.getElementById("editAge").value, 10);
       const bloodGroup = document.getElementById("editBlood").value;
       const hasDonated = document.getElementById("editHasDonated").value === "yes";
-      const lastDonationDate = document.getElementById("editLastDonation").value || null;
-      const donationCount = parseInt(document.getElementById("editDonationCount").value, 10) || 0;
+      const lastDonationDate = hasDonated ? (document.getElementById("editLastDonation").value || null) : null;
+      const donationCount = Math.min(999, Math.max(0, parseInt(document.getElementById("editDonationCount").value, 10) || 0));
 
-      if (name.length < 2) {
+      if (!Number.isInteger(age) || age < 18 || age > 60) {
+        showToast("Age must be between 18 and 60.", "error");
+        return;
+      }
+      if (name.length < 2 || name.length > 80) {
         showToast("Please enter your full name.", "error");
         return;
       }
@@ -316,6 +344,7 @@
           name,
           phone,
           gender,
+          age,
           bloodGroup,
           hasDonated,
           lastDonationDate: lastDonationDate || null,
@@ -327,12 +356,13 @@
 
         currentUser = { ...currentUser, ...updates };
         setCurrentUser(currentUser);
+        await syncPublicProfile(currentUser);
         fillView(currentUser);
         showView();
         showToast("Profile updated successfully!", "success");
       } catch (err) {
         console.error(err);
-        showToast(err.message || "Update failed.", "error");
+        showToast("Update failed.", "error");
       } finally {
         btn.disabled = false;
         btnText.textContent = "Save Changes";

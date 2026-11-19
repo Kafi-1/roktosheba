@@ -1,24 +1,35 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn" data-page="create-request">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Create Request - RoktoSeva</title>
+  <title>Create Blood Request | RoktoSeva</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <meta property="og:title" content="Create Blood Request | RoktoSeva" />
+  <meta property="og:image" content="https://roktosheba.agi.bd/assets/og-image.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png" />
+  <link rel="manifest" href="../manifest.json" />
+  <meta name="theme-color" content="#dc2626" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="icon" href="../assets/favicon.ico" />
+  <script src="../js/site-config.js"></script>
+  <script src="../js/i18n.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="../css/style.css" />
 </head>
 <body class="min-h-screen flex flex-col bg-[#070a13] text-white">
   <div id="navbar"></div>
 
-  <main class="flex-1 relative py-12 px-4 sm:px-8">
+  <main id="main" class="flex-1 relative py-12 px-4 sm:px-8">
     <div class="max-w-2xl mx-auto">
       <h1 class="text-3xl font-extrabold tracking-tight mb-2">
         Create <span class="text-red-500">Blood Request</span>
       </h1>
       <p class="text-slate-400 text-sm mb-8">Fill in the patient details to post an emergency blood request.</p>
 
-      <form id="requestForm" class="bg-[#0c101f]/70 border border-white/5 rounded-2xl p-6 sm:p-8 space-y-5" novalidate>
+      <form id="requestForm" class="reveal card-lift bg-[#0c101f]/70 border border-white/5 rounded-2xl p-6 sm:p-8 space-y-5" novalidate>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <div>
             <label class="form-label" for="patientName">Patient Name</label>
@@ -82,7 +93,7 @@
           <label class="form-label" for="notes">Additional Notes (optional)</label>
           <textarea id="notes" name="notes" rows="3" class="form-input resize-none" placeholder="Any special instructions..."></textarea>
         </div>
-        <button type="submit" id="submitBtn" class="w-full py-3.5 bg-gradient-to-r from-red-600 to-rose-600 rounded-xl text-white font-bold uppercase tracking-widest shadow-[0_4px_25px_rgba(220,38,38,0.25)] hover:shadow-[0_4px_35px_rgba(220,38,38,0.45)] transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+        <button type="submit" id="submitBtn" class="w-full py-3.5 bg-gradient-to-r from-red-600 to-rose-600 btn-shine rounded-xl text-white font-bold uppercase tracking-widest shadow-[0_4px_25px_rgba(220,38,38,0.25)] hover:shadow-[0_4px_35px_rgba(220,38,38,0.45)] transition-all disabled:opacity-50 flex items-center justify-center gap-2">
           <span id="submitBtnText">Post Request</span>
           <span id="submitSpinner" class="spinner hidden"></span>
         </button>
@@ -128,7 +139,8 @@
 
     // Min date = today
     const dateInput = document.getElementById("dateNeeded");
-    const today = new Date().toISOString().split("T")[0];
+    const _n = new Date(); // local date (UTC would allow "yesterday" in Bangladesh)
+    const today = _n.getFullYear() + "-" + String(_n.getMonth() + 1).padStart(2, "0") + "-" + String(_n.getDate()).padStart(2, "0");
     dateInput.setAttribute("min", today);
 
     document.getElementById("requestForm").addEventListener("submit", async (e) => {
@@ -143,72 +155,44 @@
       const dateNeeded = document.getElementById("dateNeeded").value;
       const districtId = distSel.value;
       const upazila = upaSel.value;
-      const status = document.getElementById("status").value;
-      const unitsNeeded = parseInt(document.getElementById("unitsNeeded").value, 10) || 1;
-      const patientAge = document.getElementById("patientAge").value
-        ? parseInt(document.getElementById("patientAge").value, 10)
-        : null;
+      const status = document.getElementById("status").value === "Urgent" ? "Urgent" : "Pending";
+      const unitsNeeded = Math.min(20, Math.max(1, parseInt(document.getElementById("unitsNeeded").value, 10) || 1));
+      const ageRaw = parseInt(document.getElementById("patientAge").value, 10);
+      const patientAge = Number.isFinite(ageRaw) ? Math.min(120, Math.max(0, ageRaw)) : null;
       const phone = document.getElementById("phone").value.trim().replace(/\s|-/g, "");
-      const emergencyContact = document.getElementById("emergencyContact").value.trim();
-      const notes = document.getElementById("notes").value.trim();
+      const emergencyContact = document.getElementById("emergencyContact").value.trim().slice(0, 80);
+      const notes = document.getElementById("notes").value.trim().slice(0, 500);
       const districtName = districts.find((d) => d.id === districtId)?.name || "";
 
-      if (!patientName || !bloodGroup || !hospital || !dateNeeded || !districtId || !upazila) {
-        showToast("Please fill all required fields.", "error");
-        return;
-      }
-      if (!isValidBDPhone(phone)) {
-        showToast("Enter a valid BD phone (01XXXXXXXXX).", "error");
-        return;
-      }
-      if (unitsNeeded < 1) {
-        showToast("Units needed must be at least 1.", "error");
-        return;
-      }
+      if (!patientName || !bloodGroup || !hospital || !dateNeeded || !districtId || !upazila) return showToast("Please fill all required fields.", "error");
+      if (!isValidBDPhone(phone)) return showToast("Enter a valid BD phone (01XXXXXXXXX).", "error");
 
-      btn.disabled = true;
-      btnText.textContent = "Posting...";
-      spinner.classList.remove("hidden");
-
+      const reset = () => { btn.disabled = false; btnText.textContent = _("Post Request"); spinner.classList.add("hidden"); };
+      btn.disabled = true; btnText.textContent = _("Posting..."); spinner.classList.remove("hidden");
       try {
         const fb = await initFirebase();
-        if (!fb) {
-          showToast("Firebase is not configured. Add your keys in js/firebase-config.js", "error");
-          btn.disabled = false;
-          btnText.textContent = "Post Request";
-          spinner.classList.add("hidden");
-          return;
-        }
+        if (!fb) { showToast("Service is temporarily unavailable.", "error"); return reset(); }
+        const { collection, doc, writeBatch, serverTimestamp } = await getFirestoreFns();
 
-        const { collection, addDoc, serverTimestamp } = await getFirestoreFns();
-        await addDoc(collection(fb.db, "requests"), {
-          patientName,
-          bloodGroup,
-          hospital,
-          dateNeeded,
-          district: districtName,
-          upazila,
-          status,
-          unitsNeeded,
-          patientAge,
-          phone,
-          emergencyContact: emergencyContact || null,
-          notes,
-          userId: user.uid || user.email,
-          userName: user.name || "",
-          createdAt: serverTimestamp()
+        // Public request (no phone) + private contact doc (logged-in users only)
+        const reqRef = doc(collection(fb.db, "requests"));
+        const batch = writeBatch(fb.db);
+        batch.set(reqRef, {
+          patientName: patientName.slice(0, 80), bloodGroup, hospital: hospital.slice(0, 120), dateNeeded,
+          district: districtName, upazila, status, unitsNeeded, patientAge, notes,
+          userId: user.uid, userName: (user.name || "").slice(0, 80), createdAt: serverTimestamp()
         });
+        batch.set(doc(fb.db, "requestContacts", reqRef.id), {
+          userId: user.uid, phone, emergencyContact: emergencyContact || null
+        });
+        await batch.commit();
 
         showToast("Blood request posted successfully!", "success");
-        setTimeout(() => {
-          window.location.href = "my-requests.html";
-        }, 1000);
+        setTimeout(() => (window.location.href = "my-requests.html"), 900);
       } catch (err) {
         console.error(err);
-        showToast(err.message || "Failed to post request.", "error");
-        btn.disabled = false;
-        btnText.textContent = "Post Request";
-        spinner.classList.add("hidden");
+        showToast("Failed to post request.", "error");
+        reset();
       }
     });
   </script>

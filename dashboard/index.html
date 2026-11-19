@@ -1,17 +1,28 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn" data-page="dashboard">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard - RoktoSeva</title>
+  <title>Dashboard | RoktoSeva</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <meta property="og:title" content="Dashboard | RoktoSeva" />
+  <meta property="og:image" content="https://roktosheba.agi.bd/assets/og-image.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png" />
+  <link rel="manifest" href="../manifest.json" />
+  <meta name="theme-color" content="#dc2626" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="icon" href="../assets/favicon.ico" />
+  <script src="../js/site-config.js"></script>
+  <script src="../js/i18n.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="../css/style.css" />
 </head>
 <body class="min-h-screen flex flex-col bg-[#070a13] text-white">
   <div id="navbar"></div>
 
-  <main class="flex-1 relative py-12 px-4 sm:px-8">
+  <main id="main" class="flex-1 relative py-12 px-4 sm:px-8">
     <div class="max-w-6xl mx-auto">
       <div class="mb-10">
         <h1 class="text-3xl font-extrabold tracking-tight mb-1">
@@ -20,20 +31,28 @@
         <p class="text-slate-400 text-sm">Manage your donations, requests, and profile from here.</p>
       </div>
 
+      <div id="completeBanner" class="hidden mb-8 rounded-2xl border border-red-500/30 bg-gradient-to-r from-red-600/15 to-rose-600/5 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-pop">
+        <div>
+          <p class="font-bold text-white">Complete your donor profile</p>
+          <p class="text-xs text-slate-400 mt-1">Add your blood group and location so people can find you as a donor.</p>
+        </div>
+        <a href="../register.html?complete=1" class="btn-shine shrink-0 text-center px-5 py-2.5 bg-gradient-to-r from-red-600 to-rose-600 rounded-xl text-white font-bold text-xs uppercase tracking-wider">Complete Profile</a>
+      </div>
+
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
-        <div class="bg-[#0c101f]/70 border border-white/5 rounded-2xl p-5 text-center">
+        <div class="reveal card-lift bg-[#0c101f]/70 border border-white/5 rounded-2xl p-5 text-center">
           <div class="text-2xl font-black text-white mb-1" id="statMyRequests">—</div>
           <div class="text-[10px] uppercase tracking-widest text-slate-500">My Requests</div>
         </div>
-        <div class="bg-[#0c101f]/70 border border-white/5 rounded-2xl p-5 text-center">
+        <div class="reveal card-lift bg-[#0c101f]/70 border border-white/5 rounded-2xl p-5 text-center">
           <div class="text-2xl font-black text-white mb-1" id="statDonations">—</div>
           <div class="text-[10px] uppercase tracking-widest text-slate-500">Donations Made</div>
         </div>
-        <div class="bg-[#0c101f]/70 border border-white/5 rounded-2xl p-5 text-center">
+        <div class="reveal card-lift bg-[#0c101f]/70 border border-white/5 rounded-2xl p-5 text-center">
           <div class="text-2xl font-black text-red-500 mb-1" id="userBlood">—</div>
           <div class="text-[10px] uppercase tracking-widest text-slate-500">Blood Group</div>
         </div>
-        <div class="bg-[#0c101f]/70 border border-white/5 rounded-2xl p-5 text-center">
+        <div class="reveal card-lift bg-[#0c101f]/70 border border-white/5 rounded-2xl p-5 text-center">
           <div class="text-2xl font-black text-white mb-1" id="userStatus">Active</div>
           <div class="text-[10px] uppercase tracking-widest text-slate-500">Status</div>
         </div>
@@ -55,10 +74,10 @@
           <h3 class="font-bold text-white mb-1">Search Donors</h3>
           <p class="text-xs text-slate-400">Find available donors by blood group and location.</p>
         </a>
-        <a href="funding.html" class="group bg-[#0c101f]/70 border border-white/5 rounded-2xl p-6 hover:border-red-500/40 transition-all">
-          <div class="w-12 h-12 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500 text-xl mb-4 group-hover:bg-red-500/20 transition-colors">❤️</div>
-          <h3 class="font-bold text-white mb-1">Support Us</h3>
-          <p class="text-xs text-slate-400">Contribute to keep the platform running.</p>
+        <a href="../index.html#requests" class="group bg-[#0c101f]/70 border border-white/5 rounded-2xl p-6 hover:border-red-500/40 transition-all">
+          <div class="w-12 h-12 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500 text-xl mb-4 group-hover:bg-red-500/20 transition-colors">📡</div>
+          <h3 class="font-bold text-white mb-1">Live Requests</h3>
+          <p class="text-xs text-slate-400">Browse emergency requests from across Bangladesh.</p>
         </a>
         <a href="profile.html" class="group bg-[#0c101f]/70 border border-white/5 rounded-2xl p-6 hover:border-red-500/40 transition-all">
           <div class="w-12 h-12 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500 text-xl mb-4 group-hover:bg-red-500/20 transition-colors">👤</div>
@@ -85,7 +104,8 @@
       const avail = user.available !== false && isDonorAvailable(user.lastDonationDate);
       document.getElementById("userStatus").textContent = avail ? "Available" : "Unavailable";
       document.getElementById("userStatus").classList.toggle("text-red-500", !avail);
-      document.getElementById("statDonations").textContent = String(user.donationCount ?? 0);
+      document.getElementById("statDonations").textContent = window.i18n.fmtNum(user.donationCount ?? 0);
+      document.getElementById("completeBanner").classList.toggle("hidden", !!user.bloodGroup);
     }
 
     async function loadDashboardStats() {
@@ -103,19 +123,21 @@
         const snap = await getDocs(
           query(collection(fb.db, "requests"), where("userId", "==", user.uid))
         );
-        document.getElementById("statMyRequests").textContent = String(snap.size);
+        document.getElementById("statMyRequests").textContent = window.i18n.fmtNum(snap.size);
 
         // Refresh user profile for donation count / availability
         const profileSnap = await getDoc(doc(fb.db, "users", user.uid));
         if (profileSnap.exists()) {
           const data = profileSnap.data();
           const donationCount = data.donationCount ?? 0;
-          document.getElementById("statDonations").textContent = String(donationCount);
+          document.getElementById("statDonations").textContent = window.i18n.fmtNum(donationCount);
           const avail = data.available !== false && isDonorAvailable(data.lastDonationDate);
           document.getElementById("userStatus").textContent = avail ? "Available" : "Unavailable";
           document.getElementById("userBlood").textContent = data.bloodGroup || "—";
           const updated = { ...user, ...data, uid: user.uid, email: user.email };
           setCurrentUser(updated);
+          document.getElementById("completeBanner").classList.toggle("hidden", !!data.bloodGroup);
+          syncPublicProfile(updated); // keep the public donor card in sync (also migrates old accounts)
         }
       } catch (err) {
         console.error(err);
