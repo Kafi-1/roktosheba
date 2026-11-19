@@ -3,18 +3,20 @@
 // ============================================
 // 1. Firebase Console → Project Settings → Your apps → Web
 // 2. Enable Authentication → Email/Password
-// 3. Enable Firestore Database (start in test mode, then secure rules)
+// 3. Enable Firestore Database and PUBLISH the rules from firestore.rules
 // 4. Paste the config values below
+// NOTE: These web keys are public by design. Security comes from firestore.rules,
+//       plus restricting the API key to your domain (Google Cloud → Credentials).
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyCgbwwBdsslA1goV6JSYI0_Zzcsae4pe9M",
-  authDomain: "roktosheba-agi-bd.firebaseapp.com",
-  projectId: "roktosheba-agi-bd",
-  storageBucket: "roktosheba-agi-bd.firebasestorage.app",
-  messagingSenderId: "697932375967",
-  appId: "1:697932375967:web:c53c1389dfecb6d02e7faa",
-  measurementId: "G-5SC0XJR6KR"
+  apiKey: "AIzaSyDFf7QxfIoF6MO0gNCJZuw0xrS7lCIaHLw",
+  authDomain: "roktosheva.firebaseapp.com",
+  projectId: "roktosheva",
+  storageBucket: "roktosheva.firebasestorage.app",
+  messagingSenderId: "64168179659",
+  appId: "1:64168179659:web:8d08f98b915f252c78284e",
+  measurementId: "G-J3N3VVY6HT"
 };
 
 // Check if config is still placeholder
@@ -74,4 +76,17 @@ async function getAuthFns() {
   return await import(
     "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"
   );
+}
+
+/** Resolves with the real Firebase user (or null). Used to verify the cached login. */
+async function getFirebaseUser() {
+  const fb = await initFirebase();
+  if (!fb) return null;
+  const { onAuthStateChanged } = await getAuthFns();
+  return new Promise((resolve) => {
+    const off = onAuthStateChanged(fb.auth, (u) => {
+      off();
+      resolve(u);
+    });
+  });
 }
