@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en" data-page="admin">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Panel | RoktoSeva</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="icon" href="../assets/favicon.ico" />
+    <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png" />
+    <meta name="theme-color" content="#dc2626" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <script src="../js/site-config.js"></script>
+    <script src="../js/i18n.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../css/style.css" />
+</head>
+
+<body class="min-h-screen flex flex-col bg-[#070a13] text-white">
+    <div id="navbar"></div>
+
+    <main id="main" class="flex-1 px-4 sm:px-8 py-8">
+        <div class="max-w-6xl mx-auto" id="adminRoot" translate="no">
+            <div class="glass-card rounded-3xl p-10 text-center">
+                <div class="spinner mx-auto"></div>
+            </div>
+        </div>
+    </main>
+
+    <div id="footer"></div>
+    <script src="../js/firebase-config.js"></script>
+    <script src="../js/common.js"></script>
+    <script>
+        const user = requireAuth();
+        const root = document.getElementById("adminRoot");
+        const TABS = [
+            ["overview", "Overview"],
+            ["requests", "Requests"],
+            ["donors", "Donors"],
+            ["messages", "Messages"],
+            ["support", "Support"],
+            ["settings", "Settings"]
+        ];
+        let fb, FS, tab = "overview",
+            seq = 0;
+        const PAGE = 50,
+            cursors = {};
+        async function fetchPage(col, order, reset) {
+            const {
+                collection,
+                getDocs,
+                query,
+                orderBy,
+                limit,
+                startAfter
+            } = FS;
+            const c = [orderBy(order, "desc"), limit(PAGE)];
+            if (!reset && cursors[col]) c.push(startAfter(cursors[col]));
+            const snap = await getDocs(query(collection(fb.db, col), ...c));
+            cursors[col] = snap.docs.length === PAGE ? snap.docs[snap.docs.length - 1] : null;
+            return snap.docs.map((s) => ({
+                id: s.id,
+                ...s.data()
+            }));
+        }
+        const moreHTML = (col) => (cursors[col] ? `<div class="text-center mt-4">${btn("more", col, "Load more", B_GRAY)}</div>` : "");
+        async function loadMore(col) {
+            if (col === "requests") {
+                reqData.push(...(await fetchPage(col, "createdAt", false)));
+                drawRequests();
+            } else if (col === "messages") {
+                msgData.push(...(await fetchPage(col, "createdAt", false)));
+                drawMessages();
+            } else if (col === "contactRequests") {
+                supData.push(...(await fetchPage(col, "createdAt", false)));
+                drawSupport();
+            }
+        }
+
+        const E = escapeHTML;
+        const tsText = (t) => (t && t.seconds ? new Date(t.seconds * 1000).toLocaleString("en-GB", {
+            dateStyle: "medium",
+            timeStyle: "short"
+        }) : "—");
+        const btn = (act, id, label, cls = "") => `<button data-act="${act}" data-id="${E(id)}" class="px-3 py-1.5 text-[11px] font-bold uppercase rounded-lg border transition-all ${cls}">${label}</button>`;
+        const B_OK = "bg-green-600/10 text-green-400 border-green-500/30 hover:bg-green-600 hover:text-white";
+        const B_RED = "bg-red-600/10 text-red-400 border-red-500/30 hover:bg-red-600 hover:text-white";
+        const B_GRAY = "bg-white/5 text-slate-300 border-white/10 hover:bg-white/10";
+        const panel = () => document.getElementById("panel");
+        const empty = (m) => `<div class="glass-card rounded-2xl p-8 text-center text-slate-400 text-sm">${m}</div>`;
+        const badge = (t, c) => `<span class="text-[10px] uppercase font-bold px-2.5 py-1 rounded-lg border ${c}">${E(t)}</span>`;
+        const STATUS_C = {
+            Pending: "text-yellow-500 bg-yellow-500/10 border-yellow-500/20",
+            Urgent: "text-red-400 bg-red-500/10 border-red-500/20",
+            Fulfilled: "text-green-400 bg-green-500/10 border-green-500/20",
+            Cancelled: "text-slate-400 bg-slate-500/10 border-slate-500/20",
+            Connected: "text-green-400 bg-green-500/10 border-green-500/20",
+            Rejected: "text-slate-400 bg-slate-500/10 border-slate-500/20"
+        };
+        const toast = (m, t) => showToast(m, t);
+        const fail = (e) => {
+            console.error(e);
+            toast("Action failed. Try again.", "error");
+        };
+
+        // ---------- access ----------
+        function denied(uid) {
+            root.innerHTML = `
+        <div class="glass-card rounded-3xl p-8 sm:p-10 max-w-xl mx-auto text-center">
+          <div class="text-4xl mb-3">🔒</div>
+          <h1 class="text-xl font-bold mb-2">Admin access required</h1>
+          <p class="text-slate-400 text-sm mb-5">This account is not an admin. To make it one, open Firebase Console → Firestore → create a document in collection <b class="text-white">admins</b> with this ID (any field):</p>
+          <div class="flex items-center gap-2 bg-black/30 border border-white/10 rounded-xl p-3 text-xs break-all text-left">
+            <code id="uidBox" class="flex-1">${E(uid || user.uid)}</code>
+            <button id="copyUid" class="shrink-0 px-3 py-1.5 rounded-lg bg-red-600 text-white font-bold">Copy</button>
+          </div>
+          <a href="../index.html" class="inline-block mt-6 text-sm text-slate-400 hover:text-red-400">← Back to Home</a>
+        </div>`;
+            document.getElementById("copyUid").onclick = () => {
+                navigator.clipboard.writeText(uid || user.uid);
+                toast("Copied!", "success");
+            };
+        }
+
+        async function boot() {
+            if (!user) return;
+            fb = await initFirebase();
+            if (!fb) return denied();
+            FS = await getFirestoreFns();
+            const fu = await getFirebaseUser();
+            if (!fu) {
+                setCurrentUser(null);
+                return location.replace(loginUrl());
+            }
+            try {
+                const snap = await FS.getDoc(FS.doc(fb.db, "admins", fu.uid));
+                if (!snap.exists()) {
+                    localStorage.setItem("rs_admin", "0");
+                    return denied(fu.uid);
+                }
+            } catch (e) {
+                if (e && e.code === "permission-denied") return denied(fu.uid);
+                root.innerHTML = `<div class="glass-card rounded-3xl p-8 max-w-xl mx-auto text-center"><div class="text-4xl mb-3">⚠️</div><h1 class="text-xl font-bold mb-2">Could not verify admin access</h1><p class="text-slate-400 text-sm mb-5">Check your connection and try again.</p><button onclick="location.reload()" class="px-5 py-2 rounded-xl bg-red-600 font-bold text-sm">Retry</button></div>`;
+                return;
+            }
+            localStorage.setItem("rs_admin", "1");
+            renderShell();
+            show((location.hash || "").slice(1) || "overview");
+        }
+
+        function renderShell() {
+            root.innerHTML = `
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+          <h1 class="text-2xl sm:text-3xl font-extrabold">Admin <span class="text-red-500">Panel</span></h1>
+          <div class="flex gap-2"><a href="../index.html" class="px-4 py-2 text-xs font-bold uppercase rounded-xl bg-white/5 border border-white/10 hover:bg-white/10">← Site</a><button id="refreshBtn" class="px-4 py-2 text-xs font-bold uppercase rounded-xl bg-white/5 border border-white/10 hover:bg-white/10">↻ Refresh</button></div>
+        </div>
+        <div class="flex gap-2 overflow-x-auto pb-3 mb-6 -mx-1 px-1" id="tabs">
+          ${TABS.map(([k, l]) => `<button data-tab="${k}" class="tab-btn shrink-0 px-4 py-2 rounded-xl text-sm font-semibold border border-white/10 text-slate-400 hover:text-white">${l}</button>`).join("")}
+        </div>
+        <div id="panel"></div>`;
+            document.getElementById("tabs").addEventListener("click", (e) => {
+                const b = e.target.closest("[data-tab]");
+                if (b) show(b.dataset.tab);
+            });
+            document.getElementById("refreshBtn").onclick = () => show(tab);
+            panel().addEventListener("click", onPanelClick);
+            panel().addEventListener("change", onPanelChange);
+            panel().addEventListener("input", onPanelInput);
+            window.addEventListener("hashchange", () => {
+                const h = location.hash.slice(1);
+                if (h && h !== tab) show(h);
+            });
+        }
+
+        async function show(name) {
+            if (!TABS.some(([k]) => k === name)) name = "overview";
+            tab = name;
+            seq++;
+            if (location.hash.slice(1) !== name) history.replaceState(null, "", "#" + name);
+            document.querySelectorAll(".tab-btn").forEach((b) => {
+                const on = b.dataset.tab === name;
+                b.className = "tab-btn shrink-0 px-4 py-2 rounded-xl text-sm font-semibold border " + (on ? "bg-gradient-to-r from-red-600 to-rose-600 text-white border-red-500" : "border-white/10 text-slate-400 hover:text-white");
+            });
+            panel().innerHTML = `<div class="glass-card rounded-2xl p-10 text-center"><div class="spinner mx-auto"></div></div>`;
+            try {
+                await ({
+                    overview,
+                    requests,
+                    donors,
+                    messages,
+                    support,
+                    settings
+                } [name])();
+            } catch (e) {
+                console.error(e);
+                panel().innerHTML = empty("Could not load this section. " + E(e.code || e.message || ""));
+            }
+        }
+
+        // ---------- OVERVIEW ----------
+        async function overview() {
+            const my = seq;
+            const {
+                collection,
+                query,
+                where,
+                getCountFromServer
+            } = FS;
+            const c = (col, ...w) => getCountFromServer(query(collection(fb.db, col), ...w)).then((s) => s.data().count).catch(() => "—");
+            const [donorsN, reqAll, reqOpen, msgAll, msgRead, supPend, susp] = await Promise.all([
+                c("publicDonors"), c("requests"), c("requests", where("status", "in", ["Pending", "Urgent"])),
+                c("messages"), c("messages", where("read", "==", true)), c("contactRequests", where("status", "==", "Pending")),
+                c("users", where("suspended", "==", true))
+            ]);
+            if (my !== seq) return;
+            const unread = typeof msgAll === "number" && typeof msgRead === "number" ? msgAll - msgRead : "—";
+            const card = (n, label, go, color = "text-white") => `<button data-go="${go}" class="glass-card card-lift rounded-2xl p-5 text-left"><div class="text-3xl font-extrabold ${color}">${n}</div><div class="text-[11px] uppercase tracking-wider text-slate-400 mt-1">${label}</div></button>`;
+            panel().innerHTML = `<div class="grid grid-cols-2 lg:grid-cols-3 gap-4">
+        ${card(donorsN, "Public donors", "donors")}
+        ${card(reqOpen, "Open requests", "requests", "text-red-400")}
+        ${card(reqAll, "Total requests", "requests")}
+        ${card(unread, "Unread messages", "messages", "text-yellow-400")}
+        ${card(supPend, "Support requests pending", "support", "text-yellow-400")}
+        ${card(susp, "Suspended donors", "donors")}
+      </div>
+      <p class="text-xs text-slate-500 mt-6">Tip: admins are users that have a document in the <b>admins</b> collection.</p>`;
+        }
+
+        // ---------- REQUESTS ----------
+        let reqData = [];
+        async function requests() {
+            const my = seq;
+            const rows = await fetchPage("requests", "createdAt", true);
+            if (my !== seq) return;
+            reqData = rows;
+            panel().innerHTML = `
+        <div class="flex flex-wrap gap-3 mb-5">
+          <input id="rq" class="form-input flex-1 min-w-[180px] text-sm py-2" placeholder="Search patient, hospital, district..." />
+          <select id="rs" class="form-input w-auto text-sm py-2"><option value="">All status</option><option>Pending</option><option>Urgent</option><option>Fulfilled</option><option>Cancelled</option></select>
+        </div><div id="rlist" class="space-y-3"></div><div id="rmore"></div>`;
+            drawRequests();
+        }
+
+        function drawRequests() {
+            const q = (document.getElementById("rq").value || "").toLowerCase(),
+                st = document.getElementById("rs").value;
+            const rows = reqData.filter((r) => (!st || r.status === st) && (!q || [r.patientName, r.hospital, r.district, r.upazila, r.bloodGroup].join(" ").toLowerCase().includes(q)));
+            document.getElementById("rlist").innerHTML = rows.length ? rows.map((r) => `
+        <div class="glass-card rounded-2xl p-4 sm:p-5" id="row-${E(r.id)}">
+          <div class="flex flex-wrap items-start justify-between gap-3">
+            <div class="flex items-start gap-3">
+              <div class="w-11 h-11 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500 font-black">${E(r.bloodGroup || "—")}</div>
+              <div>
+                <p class="font-bold">${E(r.patientName || "Patient")} <span class="text-slate-500 font-normal text-xs">· ${E(r.userName || "")}</span></p>
+                <p class="text-xs text-slate-400 mt-1">🏥 ${E(r.hospital || "—")} · 📍 ${E([r.upazila, r.district].filter(Boolean).join(", ") || "—")}</p>
+                <p class="text-xs text-slate-500 mt-1">📅 ${E(r.dateNeeded || "—")} · ${E(r.unitsNeeded || 1)} unit(s) · posted ${tsText(r.createdAt)}</p>
+                ${r.notes ? `<p class="text-xs text-slate-400 mt-2 italic">“${E(r.notes)}”</p>` : ""}
+              </div>
+            </div>
+            ${badge(r.status || "Pending", STATUS_C[r.status] || STATUS_C.Pending)}
+          </div>
+          <div class="flex flex-wrap items-center gap-2 mt-4">
+            <select data-act="rstatus" data-id="${E(r.id)}" class="form-input w-auto text-xs py-1.5">
+              ${["Pending", "Urgent", "Fulfilled", "Cancelled"].map((s) => `<option ${s === r.status ? "selected" : ""}>${s}</option>`).join("")}
+            </select>
+            ${btn("rphone", r.id, "Show contact", B_GRAY)}
+            ${btn("rdel", r.id, "Delete", B_RED)}
+            <span id="rc-${E(r.id)}" class="text-xs text-slate-300"></span>
+          </div>
+        </div>`).join("") : empty("No requests found.");
+            document.getElementById("rmore").innerHTML = moreHTML("requests");
+        }
+
+        // ---------- DONORS ----------
+        let donorData = [],
+            donorMode = "active";
+        async function donors() {
+            const my = seq;
+            const {
+                collection,
+                getDocs,
+                query,
+                where,
+                limit
+            } = FS;
+            const q = donorMode === "suspended" ? query(collection(fb.db, "users"), where("suspended", "==", true), limit(300)) :
+                donorMode === "all" ? query(collection(fb.db, "users"), limit(300)) :
+                query(collection(fb.db, "publicDonors"), limit(300));
+            const snap = await getDocs(q);
+            if (my !== seq) return;
+            donorData = [];
+            snap.forEach((s) => donorData.push({
+                id: s.id,
+                ...s.data()
+            }));
+            donorData.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+            panel().innerHTML = `
+        <div class="flex flex-wrap gap-3 mb-5">
+          <input id="dq" class="form-input flex-1 min-w-[180px] text-sm py-2" placeholder="Search name, district, blood group..." />
+          <select id="dm" class="form-input w-auto text-sm py-2"><option value="active" ${donorMode === "active" ? "selected" : ""}>Active donors</option><option value="all" ${donorMode === "all" ? "selected" : ""}>All users</option><option value="suspended" ${donorMode === "suspended" ? "selected" : ""}>Suspended</option></select>
+        </div><div id="dlist" class="space-y-3"></div>`;
+            drawDonors();
+        }
+
+        function drawDonors() {
+            const q = (document.getElementById("dq").value || "").toLowerCase();
+            const rows = donorData.filter((d) => !q || [d.name, d.district, d.upazila, d.bloodGroup].join(" ").toLowerCase().includes(q));
+            document.getElementById("dlist").innerHTML = rows.length ? rows.map((d) => `
+        <div class="glass-card rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3" id="row-${E(d.id)}">
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="w-11 h-11 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500 font-black shrink-0">${E(d.bloodGroup || "—")}</div>
+            <div class="min-w-0">
+              <p class="font-bold truncate">${E(d.name || "Donor")} <span class="text-slate-500 font-normal text-xs">${d.age ? "· " + E(d.age) + " yrs" : ""}</span> ${d.suspended ? badge("Suspended", STATUS_C.Cancelled) : ""}</p>
+              <p class="text-xs text-slate-400 truncate">📍 ${E([d.upazila, d.district].filter(Boolean).join(", ") || "—")}</p>
+              <p class="text-xs text-slate-500">Donations: ${E(d.donationCount || 0)} · Last: ${E(d.lastDonationDate || "—")}</p>
+            </div>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <span id="dc-${E(d.id)}" class="text-xs text-slate-300"></span>
+            ${btn("ddetail", d.id, "Details", B_GRAY)}
+            ${d.suspended ? btn("drest", d.id, "Restore", B_OK)
+              : (d.bloodGroup ? `<a href="../donor.html?id=${encodeURIComponent(d.id)}" target="_blank" rel="noopener" class="px-3 py-1.5 text-[11px] font-bold uppercase rounded-lg border ${B_GRAY}">View</a>` : "") + btn("dsusp", d.id, "Suspend", B_RED)}
+          </div>
+        </div>`).join("") : empty(donorMode === "suspended" ? "No suspended donors." : "No donors found.");
+        }
+
+        // ---------- MESSAGES ----------
+        let msgData = [];
+        async function messages() {
+            const my = seq;
+            const rows = await fetchPage("messages", "createdAt", true);
+            if (my !== seq) return;
+            msgData = rows;
+            drawMessages();
+        }
+
+        function drawMessages() {
+            panel().innerHTML = msgData.length ? `<div class="space-y-3">${msgData.map((m) => `
+        <div class="glass-card rounded-2xl p-5 ${m.read ? "opacity-70" : "border-red-500/30"}" id="row-${E(m.id)}">
+          <div class="flex flex-wrap justify-between gap-2">
+            <p class="font-bold">${E(m.subject || "(no subject)")} ${m.read ? "" : badge("New", STATUS_C.Urgent)}</p>
+            <span class="text-xs text-slate-500">${tsText(m.createdAt)}</span>
+          </div>
+          <p class="text-xs text-slate-400 mt-1">${E(m.name || "")} · <a class="text-red-400" href="mailto:${E(m.email || "")}">${E(m.email || "")}</a></p>
+          <p class="text-sm text-slate-200 mt-3 whitespace-pre-wrap break-words">${E(m.message || "")}</p>
+          <div class="flex flex-wrap gap-2 mt-4">
+            ${btn("mread", m.id, m.read ? "Mark unread" : "Mark read", B_GRAY)}
+            <a href="mailto:${E(m.email || "")}?subject=${encodeURIComponent("Re: " + (m.subject || ""))}" class="px-3 py-1.5 text-[11px] font-bold uppercase rounded-lg border ${B_OK}">Reply</a>
+            ${btn("mdel", m.id, "Delete", B_RED)}
+          </div>
+        </div>`).join("")}</div>${moreHTML("messages")}` : empty("No messages yet.");
+        }
+
+        // ---------- SUPPORT (contact requests) ----------
+        let supData = [];
+        async function support() {
+            const my = seq;
+            const rows = await fetchPage("contactRequests", "createdAt", true);
+            if (my !== seq) return;
+            supData = rows;
+            drawSupport();
+        }
+
+        function drawSupport() {
+            panel().innerHTML = supData.length ? `<div class="space-y-3">${supData.map((r) => `
+        <div class="glass-card rounded-2xl p-5" id="row-${E(r.id)}">
+          <div class="flex flex-wrap justify-between gap-2">
+            <p class="font-bold">Contact request · donor <a class="text-red-400" target="_blank" href="../donor.html?id=${encodeURIComponent(r.donorId || "")}">${E(r.donorName || r.donorId || "")}</a></p>
+            ${badge(r.status || "Pending", STATUS_C[r.status] || STATUS_C.Pending)}
+          </div>
+          <p class="text-xs text-slate-400 mt-2">Requester: <b class="text-white">${E(r.requesterName || "")}</b> · <a class="text-green-400" href="tel:${E(r.requesterPhone || "")}">${E(r.requesterPhone || "no phone")}</a> · ${tsText(r.createdAt)}</p>
+          <div class="flex flex-wrap items-center gap-2 mt-4">
+            ${btn("sphone", r.id, "Show donor phone", B_GRAY)}
+            ${btn("sconn", r.id, "Mark connected", B_OK)}
+            ${btn("srej", r.id, "Reject", B_GRAY)}
+            ${btn("sdel", r.id, "Delete", B_RED)}
+            <span id="sc-${E(r.id)}" class="text-xs text-slate-300"></span>
+          </div>
+        </div>`).join("")}</div>${moreHTML("contactRequests")}` : empty("No support requests.");
+        }
+
+        // ---------- SETTINGS ----------
+        const FIELDS = [
+            ["SEO", [
+                ["description.en", "Description (EN)", "area"],
+                ["description.bn", "Description (BN)", "area"],
+                ["keywords.en", "Keywords (EN)"],
+                ["keywords.bn", "Keywords (BN)"],
+                ["ogImage", "Share image URL (full https URL)"]
+            ]],
+            ["Contact", [
+                ["contact.email", "Support email"],
+                ["contact.phone", "Phone"],
+                ["contact.address.en", "Address (EN)"],
+                ["contact.address.bn", "Address (BN)"]
+            ]],
+            ["Social", [
+                ["social.facebook", "Facebook URL"],
+                ["social.twitter", "X / Twitter URL"],
+                ["social.instagram", "Instagram URL"],
+                ["social.youtube", "YouTube URL"]
+            ]],
+            ["Developer", [
+                ["developer.name.en", "Name (EN)"],
+                ["developer.name.bn", "Name (BN)"],
+                ["developer.title.en", "Title (EN)"],
+                ["developer.title.bn", "Title (BN)"],
+                ["developer.bio.en", "Bio (EN)", "area"],
+                ["developer.bio.bn", "Bio (BN)", "area"],
+                ["developer.photo", "Photo URL"],
+                ["developer.links.website", "Website"],
+                ["developer.links.github", "GitHub"],
+                ["developer.links.linkedin", "LinkedIn"],
+                ["developer.links.facebook", "Facebook"],
+                ["developer.links.email", "Email"]
+            ]]
+        ];
+        const getPath = (o, p) => p.split(".").reduce((a, k) => (a ? a[k] : undefined), o);
+        async function settings() {
+            panel().innerHTML = `<form id="setForm" class="space-y-6">
+        ${FIELDS.map(([title, fs]) => `<div class="glass-card rounded-2xl p-5"><h2 class="text-xs font-bold uppercase tracking-widest text-red-400 mb-4">${title}</h2>
+          <div class="grid sm:grid-cols-2 gap-4">${fs.map(([path, label, type]) => {
+            const v = E(getPath(CFG, path) || "");
+            return `<div class="${type === "area" ? "sm:col-span-2" : ""}"><label class="form-label">${label}</label>${type === "area"
+              ? `<textarea data-path="${path}" rows="3" class="form-input">${v}</textarea>` : `<input data-path="${path}" value="${v}" class="form-input" />`}</div>`;
+          }).join("")}</div></div>`).join("")}
+        <button type="submit" class="btn-shine px-8 py-3 bg-gradient-to-r from-red-600 to-rose-600 rounded-xl font-bold text-sm">Save settings</button>
+        <p class="text-xs text-slate-500">Saved to Firestore <b>settings/site</b>. Changes appear on the site within seconds. Empty fields fall back to the default value from site-config.js.</p>
+      </form>`;
+            document.getElementById("setForm").addEventListener("submit", saveSettings);
+        }
+        async function saveSettings(e) {
+            e.preventDefault();
+            const out = {};
+            let bad = "";
+            const URLF = /^(ogImage|social\..+|developer\.photo|developer\.links\.(website|github|linkedin|facebook))$/;
+            e.target.querySelectorAll("[data-path]").forEach((el) => {
+                const v = el.value.trim(),
+                    p = el.dataset.path;
+                if (v && URLF.test(p) && !(/^https?:\/\/\S+$/i.test(v) || (/^(ogImage|developer\.photo)$/.test(p) && /^(assets\/|\/)\S+$/.test(v)))) bad = bad || p;
+                if (v && /(^|\.)email$/.test(p) && !isValidEmail(v.replace(/^mailto:/, ""))) bad = bad || p;
+                const def = getPath(_DEFAULTS, p) || "";
+                const keys = p.split(".");
+                let o = out;
+                keys.slice(0, -1).forEach((k) => (o = o[k] = o[k] || {}));
+                o[keys[keys.length - 1]] = v && v !== def ? v : FS.deleteField(); // empty / default → fall back to site-config default
+            });
+            if (bad) return toast("Invalid value: " + bad, "error");
+            const sb = e.target.querySelector("button[type=submit]");
+            sb.disabled = true;
+            try {
+                await FS.setDoc(FS.doc(fb.db, "settings", "site"), out, {
+                    merge: true
+                });
+                try {
+                    localStorage.removeItem("rs_settings");
+                } catch {}
+                toast("Settings saved.", "success");
+            } catch (err) {
+                fail(err);
+            } finally {
+                sb.disabled = false;
+            }
+        }
+
+        // ---------- events ----------
+        function onPanelInput(e) {
+            if (e.target.id === "rq") drawRequests();
+            if (e.target.id === "dq") drawDonors();
+        }
+
+        function onPanelChange(e) {
+            const t = e.target;
+            if (t.id === "rs") return drawRequests();
+            if (t.id === "dm") {
+                donorMode = t.value;
+                return donors();
+            }
+            if (t.dataset.act === "rstatus") setReqStatus(t.dataset.id, t.value);
+        }
+        async function onPanelClick(e) {
+            const go = e.target.closest("[data-go]");
+            if (go) return show(go.dataset.go);
+            const b = e.target.closest("button[data-act]");
+            if (!b) return;
+            const id = b.dataset.id,
+                act = b.dataset.act;
+            if (b.disabled) return;
+            b.disabled = true;
+            const {
+                doc,
+                getDoc,
+                updateDoc,
+                deleteDoc
+            } = FS;
+            try {
+                if (act === "more") {
+                    await loadMore(id);
+                } else if (act === "rphone") {
+                    const s = await getDoc(doc(fb.db, "requestContacts", id));
+                    const d = s.exists() ? s.data() : null;
+                    document.getElementById("rc-" + id).innerHTML = d ? `📞 <a class="text-green-400" href="tel:${E(d.phone)}">${E(d.phone)}</a>${d.emergencyContact ? " · " + E(d.emergencyContact) : ""}` : "No contact saved";
+                } else if (act === "rdel") {
+                    if (!confirm("Delete this request?")) return;
+                    await deleteDoc(doc(fb.db, "requests", id));
+                    try {
+                        await deleteDoc(doc(fb.db, "requestContacts", id));
+                    } catch {}
+                    reqData = reqData.filter((r) => r.id !== id);
+                    drawRequests();
+                    toast("Deleted.", "success");
+                } else if (act === "ddetail") {
+                    const s = await getDoc(doc(fb.db, "users", id));
+                    const d = s.exists() ? s.data() : null;
+                    document.getElementById("dc-" + id).innerHTML = d ? `📞 <a class="text-green-400" href="tel:${E(d.phone || "")}">${E(d.phone || "—")}</a> · ✉ ${E(d.email || "—")}${d.guardianPhone ? " · guardian " + E(d.guardianPhone) : ""}` : "No private profile";
+                } else if (act === "dsusp") {
+                    if (!confirm("Suspend this donor? They will disappear from public lists.")) return;
+                    await updateDoc(doc(fb.db, "users", id), {
+                        suspended: true
+                    });
+                    await deleteDoc(doc(fb.db, "publicDonors", id));
+                    try {
+                        await deleteDoc(doc(fb.db, "donorContacts", id));
+                    } catch {}
+                    const sd = donorData.find((d) => d.id === id);
+                    if (donorMode === "all") {
+                        if (sd) sd.suspended = true;
+                    } else donorData = donorData.filter((d) => d.id !== id);
+                    drawDonors();
+                    toast("Donor suspended.", "success");
+                } else if (act === "drest") {
+                    const us = await getDoc(doc(fb.db, "users", id));
+                    const ud = us.exists() ? us.data() : null;
+                    await updateDoc(doc(fb.db, "users", id), {
+                        suspended: false
+                    });
+                    let listed = false;
+                    if (ud && ud.bloodGroup) { // rebuild the public donor card right away (admin may write publicDonors)
+                        await syncPublicProfile({
+                            ...ud,
+                            uid: id,
+                            suspended: false
+                        });
+                        listed = (await getDoc(doc(fb.db, "publicDonors", id))).exists();
+                    }
+                    const rd = donorData.find((d) => d.id === id);
+                    if (donorMode === "all") {
+                        if (rd) rd.suspended = false;
+                    } else donorData = donorData.filter((d) => d.id !== id);
+                    drawDonors();
+                    toast(listed ? "Donor restored and listed again." : "Restored. Donor will be listed once they complete their profile.", "success");
+                } else if (act === "mread") {
+                    const m = msgData.find((x) => x.id === id);
+                    await updateDoc(doc(fb.db, "messages", id), {
+                        read: !m.read
+                    });
+                    m.read = !m.read;
+                    drawMessages();
+                } else if (act === "mdel") {
+                    if (!confirm("Delete this message?")) return;
+                    await deleteDoc(doc(fb.db, "messages", id));
+                    msgData = msgData.filter((x) => x.id !== id);
+                    drawMessages();
+                    toast("Deleted.", "success");
+                } else if (act === "sphone") {
+                    const r = supData.find((x) => x.id === id);
+                    const s = await getDoc(doc(fb.db, "users", r.donorId));
+                    const d = s.exists() ? s.data() : null;
+                    document.getElementById("sc-" + id).innerHTML = d ? `Donor: 📞 <a class="text-green-400" href="tel:${E(d.phone || "")}">${E(d.phone || "—")}</a>` : "Donor not found";
+                } else if (act === "sconn" || act === "srej") {
+                    const status = act === "sconn" ? "Connected" : "Rejected";
+                    await updateDoc(doc(fb.db, "contactRequests", id), {
+                        status
+                    });
+                    supData.find((x) => x.id === id).status = status;
+                    drawSupport();
+                    toast("Updated.", "success");
+                } else if (act === "sdel") {
+                    if (!confirm("Delete this request?")) return;
+                    await deleteDoc(doc(fb.db, "contactRequests", id));
+                    supData = supData.filter((x) => x.id !== id);
+                    drawSupport();
+                    toast("Deleted.", "success");
+                }
+            } catch (err) {
+                fail(err);
+            } finally {
+                b.disabled = false;
+            }
+        }
+        async function setReqStatus(id, status) {
+            try {
+                await FS.updateDoc(FS.doc(fb.db, "requests", id), {
+                    status
+                });
+                const r = reqData.find((x) => x.id === id);
+                if (r) r.status = status;
+                drawRequests();
+                toast("Updated.", "success");
+            } catch (err) {
+                fail(err);
+            }
+        }
+
+        boot();
+    </script>
+</body>
+
+</html>
